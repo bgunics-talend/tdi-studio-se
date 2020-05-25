@@ -4004,9 +4004,9 @@ public class Process extends Element implements IProcess2, IGEFProcess, ILastVer
             }
             CommandStack commandStack = (CommandStack) editor.getTalendEditor().getAdapter(CommandStack.class);
             commandStack.addCommandStackEventListener(commandStackEventListener);
-            if (!isReadOnly()) { // when readonly. don't check the modifications.
-                getUpdateManager().updateAll();
-            }
+//            if (!isReadOnly()) { // when readonly. don't check the modifications.
+//                getUpdateManager().updateAll();
+//            }
             // ProjectPreferences projectPreferences = (ProjectPreferences) Log4jPrefsSettingManager.getInstance()
             // .getLog4jPreferences(Log4jPrefsConstants.LOG4J_ENABLE_NODE, false);
             IEclipsePreferences projectPreferences = (IEclipsePreferences) Log4jPrefsSettingManager.getInstance()
