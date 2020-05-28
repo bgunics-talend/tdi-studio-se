@@ -2195,6 +2195,30 @@ public abstract class AbstractElementPropertySectionController implements Proper
 
             String distroVersion = getValueFromRepositoryName(elem, "IMPALA_VERSION");
             connParameters.getParameters().put(ConnParameterKeys.CONN_PARA_KEY_IMPALA_VERSION, distroVersion);
+            
+            String distroDriver = getValueFromRepositoryName(elem, "IMPALA_DRIVER");
+            if(distroDriver != null) {
+            	distroDriver = TalendQuoteUtils.removeQuotesIfExist(distroDriver);
+            }
+            connParameters.getParameters().put(ConnParameterKeys.IMPALA_DRIVER, distroDriver);
+            
+            String distroKrb = getValueFromRepositoryName(elem, "USE_KRB");
+            if(distroKrb != null) {
+            	distroKrb = TalendQuoteUtils.removeQuotesIfExist(distroKrb);
+            }
+            connParameters.getParameters().put(ConnParameterKeys.CONN_PARA_KEY_USE_KRB, distroKrb);
+            
+            String distroPri = getValueFromRepositoryName(elem, "IMPALA_PRINCIPAL");
+            if(distroPri != null) {
+            	distroPri = TalendQuoteUtils.removeQuotesIfExist(distroPri);
+            }
+            connParameters.getParameters().put(ConnParameterKeys.IMPALA_AUTHENTICATION_PRINCIPLA, distroPri);
+            
+            String distroJdbc = getValueFromRepositoryName(elem, "IMPALA_ADDITIONAL_JDBC");
+            if(distroJdbc != null) {
+            	distroJdbc = TalendQuoteUtils.removeQuotesIfExist(distroJdbc);
+            }
+            connParameters.getParameters().put(ConnParameterKeys.CONN_PARA_KEY_HIVE_ADDITIONAL_JDBC_SETTINGS, distroJdbc);
         }
         // Get real hsqldb type
         if (type.equals(EDatabaseTypeName.HSQLDB.name())
