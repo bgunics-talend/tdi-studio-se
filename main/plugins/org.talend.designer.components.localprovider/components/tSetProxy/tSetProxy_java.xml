@@ -80,6 +80,7 @@
         <IMPORTS>
             <IMPORT NAME="talend-proxy" MODULE="talend-proxy-1.0.0.jar" MVN="mvn:org.talend.components.lib/talend-proxy/1.0.0" REQUIRED_IF="(PROXY_GLOBAL == 'false')" />
             <IMPORT NAME="apache-commons-lang3" MODULE="apache-commons-lang3-3.9.jar" MVN="mvn:org.apache.commons/commons-lang3/3.9" REQUIRED_IF="(PROXY_GLOBAL == 'false')" />
+            <IMPORT NAME="log4j" MODULE="log4j-1.2.17.jar" MVN="mvn:log4j/log4j/1.2.17" REQUIRED_IF="(PROXY_GLOBAL == 'false')" />
         </IMPORTS>
     </CODEGENERATION>
     <RETURNS/>
