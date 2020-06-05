@@ -3,6 +3,7 @@
 		org.talend.core.model.process.INode
 		org.talend.core.model.process.ElementParameterParser
 		org.talend.designer.codegen.config.CodeGeneratorArgument
+		java.util.List
 	"
 %>
 	<%
@@ -23,12 +24,28 @@
 	
 	boolean isLog4jEnabled = ("true").equals(ElementParameterParser.getValue(node.getProcess(), "__LOG4J_ACTIVATE__"));
 	
+	String authType = ElementParameterParser.getValue(node, "__AUTH_TYPE__");
+	String connection = ElementParameterParser.getValue(node,"__CONNECTION__");
+	boolean useServiceAccountForConnection = false;
+	//Define if connection use Service account for connection
+	if(("true").equals(useExistingConn)) {
+		List< ? extends INode> nodes =  node.getProcess().getNodesOfType("tGSConnection");
+		for (INode ne : nodes) {
+			if (connection.equals(ne.getUniqueName())) {
+				String authTypeInConnectionComponent = ElementParameterParser.getValue(ne, "__AUTH_TYPE__");
+				useServiceAccountForConnection = "SERVICE_ACCOUNT".equals(authTypeInConnectionComponent);
+			}
+		}
+	} else {
+		useServiceAccountForConnection = "SERVICE_ACCOUNT".equals(authType);
+	}
+
+if (!useServiceAccountForConnection){
 	%>
 	org.jets3t.service.impl.rest.httpclient.GoogleStorageService service_<%=cid%> = null;
 	try {
 	<%
 	if(("true").equals(useExistingConn)) {
-		String connection = ElementParameterParser.getValue(node,"__CONNECTION__");
 		%>
 		service_<%=cid%> = (org.jets3t.service.impl.rest.httpclient.GoogleStorageService)globalMap.get("service_<%=connection%>");
 		<%
@@ -112,5 +129,95 @@
 		}
 		%>
 	}
+<%
+} else {
+%>
+
+
+
+
+com.google.cloud.storage.Storage storage_<%=cid%> = null;
+<%
+if(("true").equals(useExistingConn)) {
+%>
+storage_<%=cid%> = (com.google.cloud.storage.Storage)globalMap.get("service_<%=connection%>");
+<%
+} else {
+	String pathToServerAccoutKeyFile = ElementParameterParser.getValue(node, "__SERVICE_ACCOUNT_KEY__");
+%>
+	com.google.auth.Credentials credential_<%=cid%> = null;
+	try {
+		credential_<%=cid%> = com.google.auth.oauth2.GoogleCredentials
+				.fromStream(new java.io.FileInputStream(<%=pathToServerAccoutKeyFile%>));
+	} catch (IOException e_<%=cid%>) {
+		<%
+		if (("true").equals(dieOnError)) {
+		%>
+			throw(e_<%=cid%>);
+		<%
+		}
+		%>
+		<%
+		if(isLog4jEnabled){
+		%>
+			log.error("<%=cid%> - Exception in component <%=cid%>:" + e_<%=cid%>.getMessage());
+		<%
+		}
+		%>
+	}
+	com.google.cloud.storage.StorageOptions.Builder builder = com.google.cloud.storage.StorageOptions.newBuilder();
+	storage_<%=cid%> = builder.setCredentials(credential_<%=cid%>).build().getService();
+<%
+}
+%>
+	com.google.cloud.storage.BucketInfo bucketInfo_<%=cid%> = com.google.cloud.storage.BucketInfo
+		.newBuilder(<%=bucketName%>)
 	
+<%
+if(isSpecialConfig){
+	String locationToSet = "default";
+	if ("LOCATION_EUROPE".equals(location)){
+		%>
+			.setLocation("eu")
+		<%
+	} else if ("LOCATION_US".equals(location)){
+		%>
+			.setLocation("us")
+		<%
+	}
+	%>
+		
+<%
+}
+%>
+	.build();
+
+
+	com.google.cloud.storage.Storage.PredefinedAcl acl_<%=cid%> = com.google.cloud.storage.Storage.PredefinedAcl.PROJECT_PRIVATE;
+	<%
+	if ("REST_CANNED_PUBLIC_READ_WRITE".equals(acl)) {
+	%>
+		acl_<%=cid%> = com.google.cloud.storage.Storage.PredefinedAcl.PUBLIC_READ_WRITE;
+	<%
+	} else if ("REST_CANNED_PRIVATE".equals(acl)) {
+	%>
+		acl_<%=cid%> = com.google.cloud.storage.Storage.PredefinedAcl.PRIVATE;
+	<%
+	} else if ("REST_CANNED_AUTHENTICATED_READ".equals(acl)) {
+	%>
+		acl_<%=cid%> = com.google.cloud.storage.Storage.PredefinedAcl.AUTHENTICATED_READ;
+	<%
+	} else if ("REST_CANNED_PUBLIC_READ".equals(acl)) {
+	%>
+		acl_<%=cid%> = com.google.cloud.storage.Storage.PredefinedAcl.PUBLIC_READ;
+	<%
+	}
+	%>
+
+	com.google.cloud.storage.Storage.BucketTargetOption bucketTargetOption_<%=cid%> = 
+		com.google.cloud.storage.Storage.BucketTargetOption.predefinedAcl(acl_<%=cid%>);
+	storage_<%=cid%>.create(bucketInfo_<%=cid%>, bucketTargetOption_<%=cid%>);
+<%
+}
+%>	
 	
