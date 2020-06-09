@@ -132,15 +132,11 @@ if (!useServiceAccountForConnection){
 <%
 } else {
 %>
-
-
-
-
 com.google.cloud.storage.Storage storage_<%=cid%> = null;
 <%
 if(("true").equals(useExistingConn)) {
 %>
-storage_<%=cid%> = (com.google.cloud.storage.Storage)globalMap.get("service_<%=connection%>");
+	storage_<%=cid%> = (com.google.cloud.storage.Storage)globalMap.get("service_<%=connection%>");
 <%
 } else {
 	String pathToServerAccoutKeyFile = ElementParameterParser.getValue(node, "__SERVICE_ACCOUNT_KEY__");
