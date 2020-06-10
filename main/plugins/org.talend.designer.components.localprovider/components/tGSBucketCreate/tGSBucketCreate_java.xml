@@ -220,7 +220,7 @@
 				<IMPORT NAME="protobuf-java-3.11.4" MODULE="protobuf-java-3.11.4.jar" MVN="mvn:com.google.protobuf/protobuf-java/3.11.4" REQUIRED_IF="(AUTH_TYPE == 'SERVICE_ACCOUNT')" />
 				<IMPORT NAME="protobuf-java-util-3.11.4" MODULE="protobuf-java-util-3.11.4.jar" MVN="mvn:com.google.protobuf/protobuf-java-util/3.11.4" REQUIRED_IF="(AUTH_TYPE == 'SERVICE_ACCOUNT')" />
 				<IMPORT NAME="threetenbp-1.4.4" MODULE="threetenbp-1.4.4.jar" MVN="mvn:org.threeten/threetenbp/1.4.4" REQUIRED_IF="(AUTH_TYPE == 'SERVICE_ACCOUNT')" />
-	    </IMPORTS>
+		</IMPORTS>
 	</CODEGENERATION>
 
 	<RETURNS />
