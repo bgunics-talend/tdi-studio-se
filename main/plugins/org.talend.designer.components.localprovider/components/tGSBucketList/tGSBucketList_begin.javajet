@@ -112,11 +112,6 @@ if (!useServiceAccountForConnection){
 		com.google.cloud.storage.StorageOptions.Builder builder = com.google.cloud.storage.StorageOptions.newBuilder();
 		storage_<%=cid%> = builder
 				.setCredentials(credential_<%=cid%>)
-
-				<%if(isSpecifyprojectID){%>
-				.setProjectId(<%=projectID%>)
-				<%}%>
-
 				.build()
 				.getService();
 	<%
