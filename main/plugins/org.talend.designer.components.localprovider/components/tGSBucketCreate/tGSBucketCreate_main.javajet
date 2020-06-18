@@ -18,6 +18,7 @@
 	String bucketName=ElementParameterParser.getValue(node,"__BUCKET__");
 	String projectID=ElementParameterParser.getValue(node,"__PROJECT_ID__");
 	String location = ElementParameterParser.getValue(node,"__LOCATION__");
+	String locationForServiceAccount = ElementParameterParser.getValue(node,"__LOCATION_FOR_SERVICE_ACCOUNT__");
 	String acl = ElementParameterParser.getValue(node,"__ACL__");
 	
 	String dieOnError = ElementParameterParser.getValue(node, "__DIE_ON_ERROR__");
@@ -171,14 +172,9 @@ if (!useServiceAccountForConnection){
 		
 	<%
 	if(isSpecialConfig){
-		String locationToSet = "default";
-		if ("LOCATION_EUROPE".equals(location)){
+		if (locationForServiceAccount != null && !"DEFAULT".equals(locationForServiceAccount)){
 			%>
-				.setLocation("eu")
-			<%
-		} else if ("LOCATION_US".equals(location)){
-			%>
-				.setLocation("us")
+				.setLocation("<%=locationForServiceAccount%>")
 			<%
 		}
 		%>
