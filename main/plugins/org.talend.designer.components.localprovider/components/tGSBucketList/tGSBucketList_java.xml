@@ -101,7 +101,9 @@
     	<PARAMETER 
 		    NAME="SPECIFY_PROJECT" 
 		    FIELD="CHECK"
-	        NUM_ROW="40"  
+	        NUM_ROW="40"
+			REQUIRED_IF="AUTH_TYPE == 'USER_ACCOUNT_HMAC'"
+			SHOW_IF="AUTH_TYPE == 'USER_ACCOUNT_HMAC'"
   		>
         	<DEFAULT>false</DEFAULT>
     	</PARAMETER>
@@ -110,8 +112,8 @@
 	      	NAME="PROJECT_ID"
 	      	FIELD="TEXT"
 	      	NUM_ROW="50"
-	      	REQUIRED="true"
-	      	SHOW_IF="SPECIFY_PROJECT == 'true'"
+	      	REQUIRED_IF="(SPECIFY_PROJECT == 'true') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
+	      	SHOW_IF="(SPECIFY_PROJECT == 'true') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
     	>
         	<DEFAULT>""</DEFAULT>
     	</PARAMETER>

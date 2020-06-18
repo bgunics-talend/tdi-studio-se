@@ -123,8 +123,9 @@
 	    <PARAMETER 
 		    NAME="SPECIFY_PROJECT" 
 		    FIELD="CHECK"
-	        NUM_ROW="30"  
-	        SHOW_IF="LIST_IN_BUCKET_LIST == 'false'"
+	        NUM_ROW="30"
+			REQUIRED_IF="(LIST_IN_BUCKET_LIST == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
+	        SHOW_IF="(LIST_IN_BUCKET_LIST == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
 	        GROUP="QUERY_CONFIG"
   		>
         	<DEFAULT>false</DEFAULT>
@@ -134,8 +135,8 @@
 	      	NAME="PROJECT_ID"
 	      	FIELD="TEXT"
 	      	NUM_ROW="30"
-	     	REQUIRED="true"
-	      	SHOW_IF="(SPECIFY_PROJECT == 'true') AND (LIST_IN_BUCKET_LIST == 'false')"
+	     	REQUIRED_IF="(SPECIFY_PROJECT == 'true') AND (LIST_IN_BUCKET_LIST == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
+	      	SHOW_IF="(SPECIFY_PROJECT == 'true') AND (LIST_IN_BUCKET_LIST == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
 	      	GROUP="QUERY_CONFIG"
     	>
         	<DEFAULT>""</DEFAULT>

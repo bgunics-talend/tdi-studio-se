@@ -123,8 +123,9 @@
 	    <PARAMETER 
 		    NAME="SPECIFY_PROJECT" 
 		    FIELD="CHECK"
-	        NUM_ROW="30"  
-	        SHOW_IF="DEL_IN_LIST_BUCKETS == 'false'"
+	        NUM_ROW="30"
+			REQUIRED_IF="(DEL_IN_LIST_BUCKETS == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
+	        SHOW_IF="(DEL_IN_LIST_BUCKETS == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
 	        GROUP="DELETE_CONFIG"
   		>
         	<DEFAULT>false</DEFAULT>
@@ -134,8 +135,8 @@
 	      	NAME="PROJECT_ID"
 	      	FIELD="TEXT"
 	      	NUM_ROW="30"
-	     	REQUIRED="true"
-	      	SHOW_IF="(SPECIFY_PROJECT == 'true') AND (DEL_IN_LIST_BUCKETS == 'false')"
+	     	REQUIRED_IF="(SPECIFY_PROJECT == 'true') AND (DEL_IN_LIST_BUCKETS == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
+	      	SHOW_IF="(SPECIFY_PROJECT == 'true') AND (DEL_IN_LIST_BUCKETS == 'false') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
 	      	GROUP="DELETE_CONFIG"
     	>
         	<DEFAULT>""</DEFAULT>

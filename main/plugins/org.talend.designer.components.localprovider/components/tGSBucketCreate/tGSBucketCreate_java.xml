@@ -121,9 +121,9 @@
 	      	NAME="PROJECT_ID"
 	      	FIELD="TEXT"
 	      	NUM_ROW="60"
-	      	REQUIRED="true"
+	      	REQUIRED_IF="(SPECIAL_CONFIGUER == 'true') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
 	      	GROUP="BUCKET_CONFIG"
-	      	SHOW_IF="SPECIAL_CONFIGUER == 'true'"
+	      	SHOW_IF="(SPECIAL_CONFIGUER == 'true') AND (AUTH_TYPE == 'USER_ACCOUNT_HMAC')"
     	>
         	<DEFAULT>""</DEFAULT>
     	</PARAMETER>

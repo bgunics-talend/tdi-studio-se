@@ -297,12 +297,9 @@ if (!useServiceAccountForConnection){
 <%
 	}
 %>
-
 <%
 } else {
 %>
-
-
 	com.google.cloud.storage.Storage storage_<%=cid%> = null;
 	<%
 	if(("true").equals(useExistingConn)) {
@@ -336,22 +333,9 @@ if (!useServiceAccountForConnection){
 		storage_<%=cid%> = builder.setCredentials(credential_<%=cid%>).build().getService();
 	<%
 	}
-	%>
-
-
-
-	<%
 	if(!getList && !useKeysList){
-		if(isSpecifyprojectID){
 		%>
-			com.google.api.gax.paging.Page<com.google.cloud.storage.Bucket> buckets_<%=cid%> = storage_<%=cid%>.list();
-		<%
-		}else{
-		%>
-			com.google.api.gax.paging.Page<com.google.cloud.storage.Bucket> buckets_<%=cid%> = storage_<%=cid%>.list();
-		<%
-		}
-		%>
+		com.google.api.gax.paging.Page<com.google.cloud.storage.Bucket> buckets_<%=cid%> = storage_<%=cid%>.list();
 		for (com.google.cloud.storage.Bucket bucket_<%=cid%> : buckets_<%=cid%>.iterateAll()) { //start for
 			String currentBucketName_<%=cid%> = bucket_<%=cid%>.getName();
 			com.google.cloud.storage.Storage.BlobListOption blobListOptionPrefix_<%=cid%> = com.google.cloud.storage.Storage.BlobListOption.prefix(<%=objects_prefix%>);
