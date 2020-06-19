@@ -156,8 +156,6 @@
 				<ITEM NAME="EU" VALUE="EU" />
 				<ITEM NAME="US" VALUE="US" />
 				<ITEM NAME="ASIA" VALUE="ASIA" />
-				<ITEM NAME="EUR4" VALUE="EUR4" />
-				<ITEM NAME="NAM4" VALUE="NAM4" />
 			</ITEMS>
 		</PARAMETER>
     
