@@ -29,11 +29,11 @@ import org.talend.core.model.properties.Item;
 import org.talend.designer.core.model.utils.emf.talendfile.NodeType;
 import org.talend.designer.core.model.utils.emf.talendfile.ProcessType;
 
-public class MySQLDefaultDBVersion extends AbstractJobMigrationTask{
+public class GoogleStorageSetDefaultAuthTypeMigrationTask extends AbstractJobMigrationTask{
 
  @Override
  public Date getOrder() {
-     GregorianCalendar gc = new GregorianCalendar(2018, 9, 25, 10, 0, 0);
+     GregorianCalendar gc = new GregorianCalendar(2020, 5, 22, 10, 0, 0);
      return gc.getTime();
  }
 
@@ -45,52 +45,38 @@ public class MySQLDefaultDBVersion extends AbstractJobMigrationTask{
      }
 
      String [] componentsNameToAffect = new String [] {
-             "tCreateTable",
-             "tMysqlCDC",
-             "tELTMysqlMap",
-             "tMysqlBulkExec",
-             "tMysqlConnection",
-             "tMysqlInput",
-             "tMysqlOutput",
-             "tMysqlOutputBulkExec",
-             "tMysqlRow",
-             "tMysqlSCD",
-             "tMysqlSCDELT",
-             "tMysqlSP"
+             "tGSBucketCreate",
+             "tGSBucketDelete",
+             "tGSBucketExist",
+             "tGSBucketList",
+             "tGSConnection",
+             "tGSCopy",
+             "tGSDelete",
+             "tGSGet",
+             "tGSList",
+             "tGSPut"
      };
 
-     IComponentConversion defaultDBVersion = new IComponentConversion() {
+     IComponentConversion defaultAuthType = new IComponentConversion() {
 
          @Override
          public void transform(NodeType node) {
              boolean useExistConnection = "true".equals(ComponentUtilities.getNodePropertyValue(node, "USE_EXISTING_CONNECTION"));
              if (useExistConnection) return;
 
-             String componentName = node.getComponentName();
-             String dbVersion = "";
-
-             if ("tCreateTable".equals(componentName)) {
-                 String dbType = ComponentUtilities.getNodePropertyValue(node, "DBTYPE");
-                 if (!"MYSQL".equals(dbType)) return;
-                 dbVersion = ComponentUtilities.getNodePropertyValue(node, "DB_MYSQL_VERSION");
-                 if (dbVersion==null) {
-                     ComponentUtilities.addNodeProperty(node, "DB_MYSQL_VERSION", "CLOSED_LIST");
-                     ComponentUtilities.setNodeValue(node, "DB_MYSQL_VERSION", "MYSQL_5");
-                 }
-             } else {
-                 dbVersion = ComponentUtilities.getNodePropertyValue(node, "DB_VERSION");
-                 if (dbVersion==null) {
-                     ComponentUtilities.addNodeProperty(node, "DB_VERSION", "CLOSED_LIST");
-                     ComponentUtilities.setNodeValue(node, "DB_VERSION", "MYSQL_5");
-                 }
+             String authType = ComponentUtilities.getNodePropertyValue(node, "AUTH_TYPE");
+             if (authType == null) {
+                 ComponentUtilities.addNodeProperty(node, "AUTH_TYPE", "CLOSED_LIST");
+                 ComponentUtilities.setNodeValue(node, "AUTH_TYPE", "USER_ACCOUNT_HMAC");
              }
+             
          }
      };
 
      for (String componentName : componentsNameToAffect) {
          IComponentFilter componentFilter = new NameComponentFilter(componentName);
          try {
-             ModifyComponentsAction.searchAndModify(item, processType, componentFilter, Collections.singletonList(defaultDBVersion));
+             ModifyComponentsAction.searchAndModify(item, processType, componentFilter, Collections.singletonList(defaultAuthType));
          } catch (PersistenceException e) {
              ExceptionHandler.process(e);
              return ExecutionResult.FAILURE;
