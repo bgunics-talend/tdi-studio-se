@@ -61,9 +61,6 @@ public class GoogleStorageSetDefaultAuthTypeMigrationTask extends AbstractJobMig
 
          @Override
          public void transform(NodeType node) {
-             boolean useExistConnection = "true".equals(ComponentUtilities.getNodePropertyValue(node, "USE_EXISTING_CONNECTION"));
-             if (useExistConnection) return;
-
              String authType = ComponentUtilities.getNodePropertyValue(node, "AUTH_TYPE");
              if (authType == null) {
                  ComponentUtilities.addNodeProperty(node, "AUTH_TYPE", "CLOSED_LIST");
