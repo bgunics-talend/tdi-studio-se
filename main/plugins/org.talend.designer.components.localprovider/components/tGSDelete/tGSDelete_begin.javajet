@@ -202,7 +202,7 @@ if (!useServiceAccountForConnection){
 			<%
 			if(isLog4jEnabled){
 			%>
-				log.error("<%=cid%> - Exception in component <%=cid%>:" + e_<%=cid%>.getMessage());
+				log.error("<%=cid%> - Exception in component <%=cid%>.", e_<%=cid%>);
 			<%
 			}
 			%>

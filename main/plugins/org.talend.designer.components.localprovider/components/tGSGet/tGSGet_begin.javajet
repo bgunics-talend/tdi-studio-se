@@ -324,7 +324,7 @@ if (!useServiceAccountForConnection){
 			<%
 			if(isLog4jEnabled){
 			%>
-				log.error("<%=cid%> - Exception in component <%=cid%>:" + e_<%=cid%>.getMessage());
+				log.error("<%=cid%> - Exception in component <%=cid%>.", e_<%=cid%>);
 			<%
 			}
 			%>
@@ -336,7 +336,7 @@ if (!useServiceAccountForConnection){
 	if(!getList && !useKeysList){
 		%>
 		com.google.api.gax.paging.Page<com.google.cloud.storage.Bucket> buckets_<%=cid%> = storage_<%=cid%>.list();
-		for (com.google.cloud.storage.Bucket bucket_<%=cid%> : buckets_<%=cid%>.iterateAll()) { //start for
+		for (com.google.cloud.storage.Bucket bucket_<%=cid%> : buckets_<%=cid%>.iterateAll()) {
 			String currentBucketName_<%=cid%> = bucket_<%=cid%>.getName();
 			com.google.cloud.storage.Storage.BlobListOption blobListOptionPrefix_<%=cid%> = com.google.cloud.storage.Storage.BlobListOption.prefix(<%=objects_prefix%>);
 			com.google.cloud.storage.Storage.BlobListOption blobListOptionDelimiter_<%=cid%> = com.google.cloud.storage.Storage.BlobListOption.delimiter(<%=delimiter%>);
@@ -450,7 +450,10 @@ if (!useServiceAccountForConnection){
 			if(!obj_<%=cid%>.isDirectory()){
 				java.io.File parentDir_<%=cid%>=new java.io.File(file_<%=cid%>.getParent());
 				if(!parentDir_<%=cid%>.exists()){
-					parentDir_<%=cid%>.mkdirs();
+					boolean isFolderCreated_<%=cid%> = parentDir_<%=cid%>.mkdirs();
+					if(!isFolderCreated_<%=cid%>){
+						log.error("<%=cid%> - Can't create directory in '" + parentDir_<%=cid%> + "'");
+					}
 				}
 				
 				java.io.FileOutputStream out_<%=cid%> = new java.io.FileOutputStream(file_<%=cid%>);

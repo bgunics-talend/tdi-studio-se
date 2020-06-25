@@ -9,6 +9,7 @@
 CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
 INode node = (INode)codeGenArgument.getArgument();
 String cid = node.getUniqueName();
+boolean isLog4jEnabled = ("true").equals(ElementParameterParser.getValue(node.getProcess(), "__LOG4J_ACTIVATE__"));
 String authType = ElementParameterParser.getValue(node, "__AUTH_TYPE__");
 if (authType.equals("USER_ACCOUNT_HMAC")){
 	String accessKey = ElementParameterParser.getValue(node, "__ACCESS_KEY__");
@@ -35,12 +36,18 @@ if (authType.equals("USER_ACCOUNT_HMAC")){
 	try {
 		credential_<%=cid%> = com.google.auth.oauth2.GoogleCredentials
 				.fromStream(new java.io.FileInputStream(<%=pathToServerAccoutKeyFile%>));
-	} catch (IOException e) {
-		e.printStackTrace();
+	} catch (IOException e_<%=cid%>) {
+			<%
+			if(isLog4jEnabled){
+			%>
+				log.error("<%=cid%> - Exception in component <%=cid%>.", e_<%=cid%>);
+			<%
+			}
+			%>
 	}
 
-	com.google.cloud.storage.StorageOptions.Builder builder = com.google.cloud.storage.StorageOptions.newBuilder();
-	com.google.cloud.storage.Storage storage_<%=cid%> = builder.setCredentials(credential_<%=cid%>).build().getService();
+	com.google.cloud.storage.StorageOptions.Builder builder_<%=cid%> = com.google.cloud.storage.StorageOptions.newBuilder();
+	com.google.cloud.storage.Storage storage_<%=cid%> = builder_<%=cid%>.setCredentials(credential_<%=cid%>).build().getService();
 	globalMap.put("service_" + "<%=cid%>",storage_<%=cid%>);
 <%
 }

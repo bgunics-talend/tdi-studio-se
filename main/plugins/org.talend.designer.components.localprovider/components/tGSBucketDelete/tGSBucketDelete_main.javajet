@@ -119,10 +119,6 @@ if (!useServiceAccountForConnection){
 <%
 } else {
 %>
-
-
-
-
 com.google.cloud.storage.Storage storage_<%=cid%> = null;
 <%
 if(("true").equals(useExistingConn)) {
@@ -147,7 +143,7 @@ if(("true").equals(useExistingConn)) {
 		<%
 		if(isLog4jEnabled){
 		%>
-			log.error("<%=cid%> - Exception in component <%=cid%>:" + e_<%=cid%>.getMessage());
+			log.error("<%=cid%> - Exception in component <%=cid%>.", e_<%=cid%>);
 		<%
 		}
 		%>
