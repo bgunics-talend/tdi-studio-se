@@ -792,4 +792,5 @@ public class DbGenerationManagerTest extends DbGenerationManagerTestHelper {
                 + "  FROM\n" + "   table1\n" + "  WHERE t.column2 = '\" +context.param2+ \"'\n" + " ) table2\"";
         assertEquals(exceptQuery.replaceAll("\n", "").trim(), query.trim());
     }
+
 }
