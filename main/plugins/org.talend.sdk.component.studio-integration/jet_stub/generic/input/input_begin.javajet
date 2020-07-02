@@ -48,7 +48,7 @@ if (mgr_<%=cid%>.getContainer().findAll().isEmpty()) {
     mgr_<%=cid%>.autoDiscoverPlugins(false, true);
 }
 
-final org.talend.sdk.component.runtime.di.record.DiMappingMetaRegistry registry_<%=cid%> = new org.talend.sdk.component.runtime.di.record.DiMappingMetaRegistry();
+final org.talend.sdk.component.runtime.record.RecordConverters.MappingMetaRegistry registry_<%=cid%> = new org.talend.sdk.component.runtime.record.RecordConverters.MappingMetaRegistry();
 
 <%@include file="../configuration.javajet"%>
 
