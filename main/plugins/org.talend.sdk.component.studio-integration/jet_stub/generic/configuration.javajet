@@ -15,8 +15,6 @@
 final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashMap<>();
 <%
     final List<ElementParameter> params = List.class.cast(node.getElementParametersWithChildrens());
-    final String dynamicColumnsMarker = "___TCK_DYNAMIC_COLUMN___";
-    int dynamicColumnsCount = 0;
     if (params != null && !params.isEmpty()) {
         for (final ElementParameter p : params) {
             Object pluginValue = p.getTaggedValue("org.talend.sdk.component.source");
@@ -67,16 +65,13 @@ final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashM
                 if(connection != null) {
                     IMetadataTable metaTable = connection.getMetadataTable();
                     List<IMetadataColumn> columns = metaTable.getListColumns();
-                    for(int i = 0; i < columns.size(); i++) {
-                        IMetadataColumn column = columns.get(i);
-                        String columnLabel = column.getLabel();
-                        if ("id_Dynamic".equals(column.getTalendType())){
-                            columnLabel = columnLabel + dynamicColumnsMarker;
-                            dynamicColumnsCount++;
+                    if (columns.stream().noneMatch("id_Dynamic".equals(column.getTalendType()))){
+                        for(int i = 0; i < columns.size(); i++) {
+                            IMetadataColumn column = columns.get(i);
+                        %>
+                        configuration_<%=cid%>.put("<%=parameterName%>[<%=i%>]", "<%=column.getLabel()%>");
+                        <%
                         }
-                    %>
-                        configuration_<%=cid%>.put("<%=parameterName%>[<%=i%>]", "<%=columnLabel%>");
-                    <%
                     }
                 }
             } else if (p.getFieldType() == EParameterFieldType.TACOKIT_INPUT_SCHEMA) {
@@ -89,16 +84,13 @@ final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashM
                 if(connection != null) {
                     IMetadataTable metaTable = connection.getMetadataTable();
                     List<IMetadataColumn> columns = metaTable.getListColumns();
-                    for(int i = 0; i < columns.size(); i++) {
-                        IMetadataColumn column = columns.get(i);
-                        String columnLabel = column.getLabel();
-                        if ("id_Dynamic".equals(column.getTalendType())){
-                            columnLabel = columnLabel + dynamicColumnsMarker;
-                            dynamicColumnsCount++;
+                    if (columns.stream().noneMatch("id_Dynamic".equals(column.getTalendType()))){
+                        for(int i = 0; i < columns.size(); i++) {
+                            IMetadataColumn column = columns.get(i);
+                        %>
+                        configuration_<%=cid%>.put("<%=parameterName%>[<%=i%>]", "<%=column.getLabel()%>");
+                        <%
                         }
-                    %>
-                        configuration_<%=cid%>.put("<%=parameterName%>[<%=i%>]", "<%=columnLabel%>");
-                    <%
                     }
                 }
             } else {
@@ -157,9 +149,6 @@ final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashM
 <%
                 } // else do not put value in configuration
             }
-        }
-        if (dynamicColumnsCount > 1) {
-            throw new RuntimeException("There should be only one Dynamic type in one schema.");
         }
     }
 %>
