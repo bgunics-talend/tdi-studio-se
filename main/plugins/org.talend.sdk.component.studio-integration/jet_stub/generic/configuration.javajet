@@ -45,9 +45,7 @@ final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashM
                         }
                         String value = lineValues.get(items[j]);
                         if (!org.talend.core.model.utils.ContextParameterUtils.isDynamic(value)) {
-                            if (org.talend.core.model.utils.TalendTextUtils.isEnclosed(value)) {
-                                value = org.talend.core.model.utils.TalendTextUtils.removeQuotes(value);
-                            }
+                            value = org.talend.core.model.utils.TalendTextUtils.removeQuotes(value);
                             value = org.talend.core.model.utils.TalendTextUtils.addQuotes(value);
                         }
 %>
@@ -65,7 +63,14 @@ final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashM
                 if(connection != null) {
                     IMetadataTable metaTable = connection.getMetadataTable();
                     List<IMetadataColumn> columns = metaTable.getListColumns();
-                    if (columns.stream().noneMatch("id_Dynamic".equals(column.getTalendType()))){
+                    boolean hasDynamic = false;
+                    for (int i = 0; i < columns.size(); i++) {
+                        IMetadataColumn col = columns.get(i);
+                        if ("id_Dynamic".equals(col.getTalendType())) {
+                            hasDynamic = true;
+                        }
+                    }
+                    if (!hasDynamic){
                         for(int i = 0; i < columns.size(); i++) {
                             IMetadataColumn column = columns.get(i);
                         %>
@@ -84,7 +89,14 @@ final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashM
                 if(connection != null) {
                     IMetadataTable metaTable = connection.getMetadataTable();
                     List<IMetadataColumn> columns = metaTable.getListColumns();
-                    if (columns.stream().noneMatch("id_Dynamic".equals(column.getTalendType()))){
+                    boolean hasDynamic = false;
+                    for (int i = 0; i < columns.size(); i++) {
+                        IMetadataColumn column = columns.get(i);
+                        if ("id_Dynamic".equals(column.getTalendType())) {
+                            hasDynamic = true;
+                        }
+                    }
+                    if (!hasDynamic){
                         for(int i = 0; i < columns.size(); i++) {
                             IMetadataColumn column = columns.get(i);
                         %>
@@ -119,13 +131,8 @@ final java.util.Map<String, String> configuration_<%=cid%> = new java.util.HashM
                     }
                 } else {
                     value = ElementParameterParser.getStringElementParameterValue(p);
-                    if (org.talend.core.model.utils.ContextParameterUtils.isDynamic(value)) {
-                        value = "String.valueOf(" + value + ")";
-                    }
-                    else {
-                        if (org.talend.core.model.utils.TalendTextUtils.isEnclosed(value)) {
-                            value = org.talend.core.model.utils.TalendTextUtils.removeQuotes(value);
-                        }
+                    if (!org.talend.core.model.utils.ContextParameterUtils.isDynamic(value)) {
+                        value = org.talend.core.model.utils.TalendTextUtils.removeQuotes(value);
                         value = org.talend.core.model.utils.TalendTextUtils.addQuotes(value);
                     }
                 }
