@@ -263,6 +263,9 @@ if (!useServiceAccountForConnection){
 	if(!queryDelObjInListBuckets || buckets.size()>0){
 	%>
 		for (com.google.cloud.storage.Blob blob_<%=cid%> : allBlobs_<%=cid%>.iterateAll()) {
+			if (blob_<%=cid%>.isDirectory()){
+				continue;
+			}
 			nb_line_<%=cid%>++;
 			blob_<%=cid%>.delete();
 	<%

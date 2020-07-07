@@ -414,6 +414,9 @@ if (!useServiceAccountForConnection){
 		if(!useKeysList){
 		%>
 			for (com.google.cloud.storage.Blob blob_<%=cid%> : allBlobs_<%=cid%>.iterateAll()) {
+				if (blob_<%=cid%>.isDirectory()){
+					continue;
+				}
 				String objkey_<%=cid%> = blob_<%=cid%>.getName();
 				java.io.File file_<%=cid%> = new java.io.File(<%=outputsDir%>, objkey_<%=cid%>);
 

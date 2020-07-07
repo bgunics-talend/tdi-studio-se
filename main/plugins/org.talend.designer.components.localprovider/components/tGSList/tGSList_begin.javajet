@@ -267,6 +267,9 @@ if (!useServiceAccountForConnection){
 	if(!listInBucketList || buckets.size()>0){
 	%>
 		for (com.google.cloud.storage.Blob blob_<%=cid%> : allBlobs_<%=cid%>.iterateAll()) {
+			if (blob_<%=cid%>.isDirectory()){
+				continue;
+			}
 			nb_line_<%=cid%>++;
 			globalMap.put("<%=cid%>_CURRENT_BUCKET", currentBucketName_<%=cid%>);
 			globalMap.put("<%=cid%>_CURRENT_KEY", blob_<%=cid%>.getName());
