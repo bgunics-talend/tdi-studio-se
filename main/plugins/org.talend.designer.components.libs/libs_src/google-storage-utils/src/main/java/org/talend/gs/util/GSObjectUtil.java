@@ -3,6 +3,8 @@ package org.talend.gs.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -182,7 +184,7 @@ public class GSObjectUtil {
 
     private String combineTwoNames(String coreDir, String targetDir, File file){
         String filePath = file.getAbsolutePath();
-        String relativePath =  targetDir + filePath.replace(coreDir + "/", "");
+        String relativePath =  targetDir + filePath.replace(coreDir + FileSystems.getDefault().getSeparator(), "");
         return relativePath;
     }
 }
