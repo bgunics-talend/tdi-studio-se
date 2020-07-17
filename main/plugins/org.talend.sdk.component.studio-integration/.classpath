@@ -11,6 +11,8 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/backport9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/javax.annotation-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/component-server-model.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/geronimo-json_1.1_spec.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/geronimo-jsonb_1.0_spec.jar"/>
