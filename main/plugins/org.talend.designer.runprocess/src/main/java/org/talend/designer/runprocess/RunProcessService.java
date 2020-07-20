@@ -510,8 +510,8 @@ public class RunProcessService implements IRunProcessService {
     }
 
     @Override
-    public boolean isExcludeDeletedItems() {
-        return delegateService.isExcludeDeletedItems();
+    public boolean isExcludeDeletedItems(Property property) {
+        return delegateService.isExcludeDeletedItems(property);
     }
 
 }

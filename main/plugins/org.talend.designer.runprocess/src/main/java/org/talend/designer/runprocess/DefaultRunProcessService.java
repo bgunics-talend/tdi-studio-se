@@ -71,7 +71,6 @@ import org.talend.core.model.repository.IRepositoryViewObject;
 import org.talend.core.model.runprocess.data.PerformanceData;
 import org.talend.core.repository.model.ProxyRepositoryFactory;
 import org.talend.core.repository.utils.Log4jUtil;
-import org.talend.core.runtime.maven.MavenConstants;
 import org.talend.core.runtime.maven.MavenUrlHelper;
 import org.talend.core.runtime.process.ITalendProcessJavaProject;
 import org.talend.core.runtime.process.LastGenerationInfo;
@@ -82,7 +81,6 @@ import org.talend.core.service.IESBMicroService;
 import org.talend.core.service.IESBRouteService;
 import org.talend.core.ui.ITestContainerProviderService;
 import org.talend.designer.core.ui.editor.process.Process;
-import org.talend.designer.maven.DesignerMavenPlugin;
 import org.talend.designer.maven.model.TalendMavenConstants;
 import org.talend.designer.maven.tools.AggregatorPomsHelper;
 import org.talend.designer.maven.tools.BuildCacheManager;
@@ -1002,9 +1000,8 @@ public class DefaultRunProcessService implements IRunProcessService {
     }
 
     @Override
-    public boolean isExcludeDeletedItems() {
-        return DesignerMavenPlugin.getPlugin().getProjectPreferenceManager().getPreferenceStore()
-                .getBoolean(MavenConstants.EXCLUDE_DELETED_ITEMS);
+    public boolean isExcludeDeletedItems(Property property) {
+        return PomIdsHelper.getIfExcludeDeletedItems(property);
     }
 
 }
