@@ -2199,6 +2199,16 @@ public abstract class AbstractElementPropertySectionController implements Proper
 
             String distroVersion = getValueFromRepositoryName(elem, "IMPALA_VERSION");
             connParameters.getParameters().put(ConnParameterKeys.CONN_PARA_KEY_IMPALA_VERSION, distroVersion);
+            
+            //IMPALA_DRIVER
+            String distroDriver = getValueFromRepositoryName(elem, "IMPALA_DRIVER");
+            connParameters.getParameters().put(ConnParameterKeys.IMPALA_DRIVER, distroDriver);
+            //IMPALA_PRINCIPAL
+            String distroPrincipal = getValueFromRepositoryName(elem, "IMPALA_PRINCIPAL");
+            connParameters.getParameters().put(ConnParameterKeys.IMPALA_AUTHENTICATION_PRINCIPLA, TextUtil.removeQuots(distroPrincipal));
+            //USE_KRB
+            String distroUseKRB = (String)getValueFromRepositoryName(elem, "USE_KRB");
+            connParameters.getParameters().put(ConnParameterKeys.CONN_PARA_KEY_USE_KRB, distroUseKRB);
         }
         // Get real hsqldb type
         if (type.equals(EDatabaseTypeName.HSQLDB.name())
