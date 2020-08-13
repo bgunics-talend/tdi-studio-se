@@ -379,7 +379,7 @@
                     <%if("KMS_CMK".equals(key_type) && set_region) {%>
                     .withCryptoConfiguration(new com.amazonaws.services.s3.model.CryptoConfiguration().withAwsKmsRegion(com.amazonaws.regions.RegionUtils.getRegion(<%=region%>)))
 					<%}%>
-					<%if(enablePathStyleAccess) {%>
+					<%if(useRegionEndpoint && enablePathStyleAccess) {%>
 					.enablePathStyleAccess()
 					<%}%>
                     .build();
@@ -412,7 +412,7 @@
                     <%}%>
                     .withCredentials(credentialsProvider_<%=cid%>)
                     .withClientConfiguration(cc_<%=cid%>)
-					<%if(enablePathStyleAccess) {%>
+					<%if(useRegionEndpoint && enablePathStyleAccess) {%>
 					.enablePathStyleAccess()
 					<%}%>
                     .build();
