@@ -37,6 +37,7 @@
 	boolean useCustomNullMarker = ElementParameterParser.getBooleanValue(node, "__USE_CUSTOM_NULL_MARKER__");
 	String nullMarker = useCustomNullMarker ? ElementParameterParser.getValue(node, "__CUSTOM_NULL_MARKER__") : "\"\\\\N\"";
 	String passwordFieldName = "";
+	String accessToken = ElementParameterParser.getValue(node, "__ACCESS_TOKEN__");
 	
 	IConnection incomingConnection = null;
 	if(node.getUniqueName().startsWith("tBigQueryOutput_")) {
@@ -174,6 +175,9 @@
 				<%
 				if(isLog4jEnabled){
 				%>
+//FIXME
+					log.debug("<%=cid%> - Access token is: " + credential_<%=cid%>.getAccessToken());
+					globalMap.put("<%=cid%>_accessToken", credential_<%=cid%>.getAccessToken());
 					log.info("<%=cid%> - Store the refresh token for future use.");
 				<%
 				}
@@ -214,8 +218,30 @@
 
 		long nb_line_<%=cid%> = 0;
 	<%
+	} else if (authMode.equals("TOKEN")) {
+	%>
+	/* ----START-CREATING-CLIENT (OAuth based Token)---- */
+		final String PROJECT_ID_<%=cid %> = <%=projectId %>;
+
+		com.google.api.client.auth.oauth2.Credential cred_<%=cid%> = 
+		new com.google.api.client.auth.oauth2.Credential(com.google.api.client.auth.oauth2.BearerToken.authorizationHeaderAccessMethod()).setFromTokenResponse( 
+			(new com.google.api.client.auth.oauth2.TokenResponse()).setAccessToken(<%=accessToken%>) );
+
+		com.google.api.services.bigquery.Bigquery bigqueryclient_<%=cid%> = null;
+		long nb_line_<%=cid%> = 0;
+		<%
+		if(isLog4jEnabled){
+		%>
+			log.info("<%=cid%> - Creating client.");
+		<%
+		}
+		%>
+		bigqueryclient_<%=cid%> = 
+		new com.google.api.services.bigquery.Bigquery.Builder(new com.google.api.client.http.javanet.NetHttpTransport(), new com.google.api.client.json.jackson2.JacksonFactory(), cred_<%=cid%>).setApplicationName("Talend").build();
+	/* ----END-CREATING-CLIENT (OAuth based Token)---- */
+	<%
 	} else {
-		throw new IllegalArgumentException("authentication mode should be either \"SERVICEACCOUNT\" or \"OAUTH\", but it is " + authMode);
+		throw new IllegalArgumentException("authentication mode should be either \"SERVICEACCOUNT\" or \"OAUTH\" or \"TOKEN\", but it is " + authMode);
 	}
 	boolean bulkFileAlreadyExists = ElementParameterParser.getBooleanValue(node, "__BULK_FILE_ALREADY_EXIST__");
 	String accessKey = ElementParameterParser.getValue(node, "__GS_ACCESS_KEY__");
@@ -294,6 +320,7 @@
 
 			com.google.cloud.storage.BlobInfo blobInfo_<%=cid%> = com.google.cloud.storage.BlobInfo.
 							newBuilder(<%=bucketName%>, file_<%=cid%>.getName()).build();
+//TODO , if gsFile doesn't match with the fileName we'll import the wrong file. fileObject_<%=cid%>.setKey(<%=gsFile%>);
 			storage_<%=cid%>.create(blobInfo_<%=cid%>, java.nio.file.Files.readAllBytes(file_<%=cid%>.toPath()));
 			<%
 			if(isLog4jEnabled){
@@ -313,7 +340,7 @@
 	int currIndex_<%=cid%> = 0;
 	<%
 	}
-    if (authMode.equals("OAUTH")) {
+    if (authMode.equals("OAUTH") || authMode.equals("TOKEN")) {
 		if(isLog4jEnabled){
 		%>
 			log.info("<%=cid%> - Starting build a job.");
@@ -799,6 +826,6 @@
 		/* ----END-CREATING-JOB (Cloud API)---- */
 	<%
 	} else {
-		throw new IllegalArgumentException("authentication mode should be either \"SERVICEACCOUNT\" or \"OAUTH\", but it is " + authMode);
+		throw new IllegalArgumentException("authentication mode should be either \"SERVICEACCOUNT\" or \"OAUTH\" or \"TOKEN\", but it is " + authMode);
 	}
 	%>
