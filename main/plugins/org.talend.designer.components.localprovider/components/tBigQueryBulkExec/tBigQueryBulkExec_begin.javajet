@@ -175,9 +175,6 @@
 				<%
 				if(isLog4jEnabled){
 				%>
-//FIXME
-					log.debug("<%=cid%> - Access token is: " + credential_<%=cid%>.getAccessToken());
-					globalMap.put("<%=cid%>_accessToken", credential_<%=cid%>.getAccessToken());
 					log.info("<%=cid%> - Store the refresh token for future use.");
 				<%
 				}
@@ -353,9 +350,12 @@
 	
 		com.google.api.services.bigquery.model.JobConfiguration config_<%=cid%> = new com.google.api.services.bigquery.model.JobConfiguration();
 		com.google.api.services.bigquery.model.JobConfigurationLoad queryLoad_<%=cid%> = new com.google.api.services.bigquery.model.JobConfigurationLoad();
-		
+
 		<%if (dropTable) {%>
 			try {
+ 				<% if(authMode.equals("TOKEN")) { %>
+ 				cred_<%=cid%>.setAccessToken(<%=accessToken%>); 
+ 				<% } %>
 				bigqueryclient_<%=cid%>.tables().delete(PROJECT_ID_<%=cid%>, <%=dataset%>, <%=table%>).execute();
 			} catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e_<%=cid%>) {
 				if (e_<%=cid%>.getDetails().getCode() != 404) {
@@ -376,12 +376,15 @@
 					}
 					%>
 				}
-			}
+			} //catch
 		<%}%>
 		
 		<%if (createTableIfNotExist) { %>
 			
 			try {
+ 				<% if(authMode.equals("TOKEN")) { %>
+ 				cred_<%=cid%>.setAccessToken(<%=accessToken%>); 
+ 				<% } %>
 				com.google.api.services.bigquery.model.Table getTable = bigqueryclient_<%=cid%>.tables().get(PROJECT_ID_<%=cid%>, <%=dataset%>, <%=table%>).execute();
 				queryLoad_<%=cid%>.setCreateDisposition("CREATE_NEVER");
 			} catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e_<%=cid%>){
@@ -505,7 +508,7 @@
 					}
 					%>
 				}
-			}
+			} //catch
 		<%
 		} else {
 		%>
@@ -541,11 +544,17 @@
 			log.info("<%=cid%> - Build a job successfully.");
 			log.info("<%=cid%> - Starting load the job.");
 		<%
+		} else {
+		%>
+			System.out.println("Starting load job.");
+		<%	
 		}
 		%>
-		System.out.println("Starting load job.");
 		com.google.api.services.bigquery.model.Job jobExec_<%=cid%> = null;
 		try {
+			<% if(authMode.equals("TOKEN")) { %>
+ 			cred_<%=cid%>.setAccessToken(<%=accessToken%>); 
+ 			<% } %>
 			jobExec_<%=cid%> = insertReq_<%=cid%>.execute();
 		} catch (Exception ee_<%=cid%>) {
 			<%
@@ -567,9 +576,15 @@
 		}
 		if (jobExec_<%=cid%>.getStatus().getState().equals("RUNNING")
 				|| jobExec_<%=cid%>.getStatus().getState().equals("PENDING")) {
+ 					<% if(authMode.equals("TOKEN")) { %>
+ 					cred_<%=cid%>.setAccessToken(<%=accessToken%>); 
+ 					<% } %>
             		com.google.api.services.bigquery.model.Job pollJob_<%=cid%> = bigqueryclient_<%=cid%>.jobs().get(PROJECT_ID_<%=cid%>,jobExec_<%=cid%>.getJobReference().getJobId()).setLocation(jobExec_<%=cid%>.getJobReference().getLocation()).execute();
 			while (pollJob_<%=cid%>.getStatus().getState().equals("RUNNING") || pollJob_<%=cid%>.getStatus().getState().equals("PENDING")) {
 				Thread.sleep(1000);
+ 				<% if(authMode.equals("TOKEN")) { %>
+ 				cred_<%=cid%>.setAccessToken(<%=accessToken%>); 
+ 				<% } %>
 				pollJob_<%=cid%> = bigqueryclient_<%=cid%>.jobs().get(PROJECT_ID_<%=cid%>,jobExec_<%=cid%>.getJobReference().getJobId()).setLocation(jobExec_<%=cid%>.getJobReference().getLocation()).execute();
 				System.out.println(String.format(
 						"Waiting on job %s ... Current status: %s", jobExec_<%=cid%>
@@ -583,7 +598,10 @@
 				}
 				%>
 			}
-	
+			
+			<% if(authMode.equals("TOKEN")) { %>
+ 			cred_<%=cid%>.setAccessToken(<%=accessToken%>); 
+ 			<% } %>
 			com.google.api.services.bigquery.model.Job doneJob_<%=cid%> = pollJob_<%=cid%>;
 	
 			if ((doneJob_<%=cid%>.getStatus() != null) && (doneJob_<%=cid%>.getStatus().getErrors() != null)) {
