@@ -250,7 +250,7 @@
 
 
 	if(!bulkFileAlreadyExists) {
-		if (!useServiceAccountForConnection){
+		if ("USER_ACCOUNT_HMAC".equals(authType)){
 			%>
 			/* ----START-UPLOADING-FILE WITH HMAC ACCOUNT---- */
 			<%
@@ -285,7 +285,7 @@
 				log.info("<%=cid%> - Upload Done.");
 			<%
 			}
-		} else {
+		} else if("GS_SERVICE_ACCOUNT".equals(authType)) { //"GS_SERVICE_ACCOUNT".equals(authType)
 			String pathToServerAccoutKeyFile = ElementParameterParser.getValue(node, "__GS_SERVICE_ACCOUNT_KEY__");
 			%>
 			/* ----START-UPLOADING-FILE WITH SERVICE ACCOUNT---- */
@@ -326,6 +326,32 @@
 			<%
 			}
 			%>
+			/* ----END-UPLOADING-FILE---- */
+			<%
+		} else {
+			%>
+			/* ----START-UPLOADING-FILE WITH OAUTH TOKEN ---- */
+			com.google.cloud.storage.Storage storage_<%=cid%> = null;
+			com.google.auth.Credentials credential_<%=cid%> = com.google.auth.oauth2.GoogleCredentials.create(
+				new com.google.auth.oauth2.AccessToken(<%=accessToken%>,new Date(Long.MAX_VALUE)));
+
+			com.google.cloud.storage.StorageOptions.Builder builder = com.google.cloud.storage.StorageOptions.newBuilder();
+			storage_<%=cid%> = builder.setCredentials(credential_<%=cid%>).build().getService();
+
+			java.io.File file_<%=cid%> = new java.io.File(<%=localFilename%>);
+
+			com.google.cloud.storage.BlobInfo blobInfo_<%=cid%> = com.google.cloud.storage.BlobInfo.
+							newBuilder(<%=bucketName%>, file_<%=cid%>.getName()).build();
+//TODO , if gsFile doesn't match with the fileName we'll import the wrong file. fileObject_<%=cid%>.setKey(<%=gsFile%>);
+			storage_<%=cid%>.create(blobInfo_<%=cid%>, java.nio.file.Files.readAllBytes(file_<%=cid%>.toPath()));
+			<%
+			if(isLog4jEnabled){
+			%>
+				log.info("<%=cid%> - Upload Done.");
+			<%
+			}
+			%>
+			/* ----END-UPLOADING-FILE---- */
 			<%
 		}
 	}
