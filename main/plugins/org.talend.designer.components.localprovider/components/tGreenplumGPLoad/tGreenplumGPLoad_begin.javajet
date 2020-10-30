@@ -580,7 +580,8 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 					}
 				%>
 				};
-				final Process ps = Runtime.getRuntime().exec(cmds);
+				String[] envparams = new String[] {"PGPASSWORD=\"" + dbPwd_<%=cid %> +"\""};
+				final Process ps = Runtime.getRuntime().exec(cmds,envparams);
 				
 				java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(ps.getInputStream()));
 				String line = "";
