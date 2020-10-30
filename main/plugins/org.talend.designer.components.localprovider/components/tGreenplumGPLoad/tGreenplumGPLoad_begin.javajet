@@ -589,6 +589,13 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 					gploadOutput_<%=cid%>.append(line);
 					System.out.println(line);
 				}
+
+				reader = new java.io.BufferedReader(new java.io.InputStreamReader(ps.getErrorStream()));
+				line = "";
+				while ((line = reader.readLine()) != null) {
+					gploadOutput_<%=cid%>.append(line);
+					System.out.println(line);
+				}
 			}
 			catch (java.lang.Exception e) {
 				globalMap.put("<%=cid%>_GPLOAD_ERROR",e.getMessage());
