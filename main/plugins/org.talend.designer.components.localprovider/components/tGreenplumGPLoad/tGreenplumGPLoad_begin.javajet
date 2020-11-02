@@ -385,17 +385,6 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 		String escape_<%=cid%> = <%=escapeChar%>;
 		String quote_<%=cid%> = <%=quoteChar%>;
 		delim_<%=cid%> = "\t".equals(delim_<%=cid%>) ? "\\t" : delim_<%=cid%>;
-		
-		String directory_<%=cid%> = <%=gploadCtrlFile%>;
-		if(directory_<%=cid%> != null && directory_<%=cid%>.trim().length() != 0 
-	    		&& directory_<%=cid%>.replace("\\","/").contains("/")) {
-	    	directory_<%=cid%> = directory_<%=cid%>.substring(0, directory_<%=cid%>.replace("\\","/").lastIndexOf("/"));
-	    	java.io.File dir_<%=cid%> = new java.io.File(directory_<%=cid%>);
-	        	if(!dir_<%=cid%>.exists()) {
-					dir_<%=cid%>.mkdirs();
-					System.out.println("Created Directory:" + dir_<%=cid%>);
-	            }
-	    }
 
 		try (java.io.PrintWriter gpctrl_<%=cid%> = new java.io.PrintWriter(new java.io.FileOutputStream(gploadCtrlFile, false), true)){
 			gpctrl_<%=cid%>.println("---");
