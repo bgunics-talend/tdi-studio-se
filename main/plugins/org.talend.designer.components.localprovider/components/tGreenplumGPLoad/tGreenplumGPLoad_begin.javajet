@@ -468,6 +468,11 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 							gpctrl_<%=cid%>.println("    - ERROR_TABLE: '" + <%=value%> + "'");
 						<%
 					}
+					if (key.equals("LOG_ERRORS")){
+						%>
+							gpctrl_<%=cid%>.println("    - LOG_ERRORS: " + <%=value%> );
+						<%
+					}
 				}
 			}
 			%>
@@ -584,9 +589,6 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 				<%
 				String passwordFieldName = "__PASS__";
 				%>
-
-				ps.waitFor();
-				globalMap.put("<%=cid%>_EXIT_CODE", ps.exitValue());
 
 				<%@ include file="@{org.talend.designer.components.localprovider}/components/templates/password.javajet"%>
 			   	
