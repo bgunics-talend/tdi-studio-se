@@ -607,13 +607,63 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 				while ((line = reader.readLine()) != null) {
 					gploadOutput_<%=cid%>.append(line);
 					System.out.println(line);
+
+					if(line.contains("|INFO|rows Inserted")){
+						globalMap.put("<%=cid%>_NB_LINE_INSERTED",Integer.parseInt(line.substring(line.indexOf("=")+1).replace(" ","")));
+					} else
+					if(line.contains("|INFO|rows Updated")){
+					      globalMap.put("<%=cid%>_NB_LINE_UPDATED", Integer.parseInt(line.substring(line.indexOf("=")+1).replace(" ","")));
+					} else if(line.contains("|INFO|data formatting errors =")){
+					      globalMap.put("<%=cid%>_NB_DATA_ERRORS", Integer.parseInt(line.substring(line.indexOf("=")+1).replace(" ","")));
+					} else if(line.contains("|INFO|gpload ") && !line.contains("session") && !line.contains("gpload.py") ){
+					      globalMap.put("<%=cid%>_STATUS", line.substring(line.indexOf("gpload ")+7).replace(" ",""));
+					} else if(line.contains("|INFO|running time:")){
+					      line = line.substring(line.indexOf("time: ")+5).replace(" ","");
+					      globalMap.put("<%=cid%>_RUNTIME", line.substring(0,line.indexOf("seconds")));
+					} else if(line.contains("|ERROR|")){
+					      line = line.substring(line.indexOf("|ERROR|")+7);
+					      String line1 = line;
+					      if(line.length()>1250) {
+					            String tmp = line.substring(0, 1000);
+					            tmp += ".....";
+					            tmp += line.substring(line.length()-200);
+					            line = tmp;
+					      }
+					      globalMap.put("<%=cid%>_ERRORMESSAGE", line);
+					      if(<%=dieOnError%>){
+					      	throw new RuntimeException ("gpload failed because: " + line1);
+					      } else {
+					      	System.out.println("WARNING GPLOAD FAILURE:" + line1);
+					      }
+					}
+
 				}
 
 				reader = new java.io.BufferedReader(new java.io.InputStreamReader(ps.getErrorStream()));
 				line = "";
 				while ((line = reader.readLine()) != null) {
 					gploadOutput_<%=cid%>.append(line);
-					System.err.println(line);
+					System.out.println(line);
+
+					if (line.contains("name 'tableName' is not defined") ) {
+
+						String line1 = "Table (" + <%=dbname%> + "." + <%=dbschema%> + "." + <%=tableName%> + ") is not available in target (" + <%=dbhost%> + ")!";
+						globalMap.put("<%=cid%>_ERRORMESSAGE", line1);
+					    if(<%=dieOnError%>){
+					      	throw new RuntimeException ("gpload failed because: " + line1);
+					    } else {
+					      	System.out.println("WARNING GPLOAD FAILURE:" + line1);
+					    }
+					}
+					if (line.toUpperCase().contains("ERROR") ) {
+						globalMap.put("<%=cid%>_ERRORMESSAGE", line);
+					    if(<%=dieOnError%>){
+					      	throw new RuntimeException ("gpload failed because: " + line);
+					    } else {
+					      	System.out.println("WARNING GPLOAD FAILURE:" + line);
+					    }
+					}
+
 				}
 			}
 			catch (java.lang.Exception e) {
