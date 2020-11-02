@@ -386,6 +386,17 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 		String quote_<%=cid%> = <%=quoteChar%>;
 		delim_<%=cid%> = "\t".equals(delim_<%=cid%>) ? "\\t" : delim_<%=cid%>;
 		
+		String directory_<%=cid%> = <%=gploadCtrlFile%>;
+		if(directory_<%=cid%> != null && directory_<%=cid%>.trim().length() != 0 
+	    		&& directory_<%=cid%>.replace("\\","/").contains("/")) {
+	    	directory_<%=cid%> = directory_<%=cid%>.substring(0, directory_<%=cid%>.replace("\\","/").lastIndexOf("/"));
+	    	java.io.File dir_<%=cid%> = new java.io.File(directory_<%=cid%>);
+	        	if(!dir_<%=cid%>.exists()) {
+					dir_<%=cid%>.mkdirs();
+					System.out.println("Created Directory:" + dir_<%=cid%>);
+	            }
+	    }
+
 		try (java.io.PrintWriter gpctrl_<%=cid%> = new java.io.PrintWriter(new java.io.FileOutputStream(gploadCtrlFile, false), true)){
 			gpctrl_<%=cid%>.println("---");
 			gpctrl_<%=cid%>.println("VERSION: 1.0.0.1");
@@ -567,6 +578,7 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 	final StringBuilder gploadOutput_<%=cid%> = new StringBuilder(200);
 	Thread gploadThread_<%=cid%> = new Thread() {
 		public void run() {
+			int nbLine_<%=cid %> = 0;
 			try {
 				String[] cmds = new String[] {
 						<%if (!"".equals(pythonPathForCMD)){%>
@@ -602,19 +614,36 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 
 				final Process ps = Runtime.getRuntime().exec(cmds,env_<%=cid %>);
 				
+				ps.waitFor();
+				globalMap.put("<%=cid%>_EXIT_CODE", ps.exitValue());
+
 				java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(ps.getInputStream()));
+				java.io.BufferedReader errorReader = new java.io.BufferedReader(new java.io.InputStreamReader(ps.getErrorStream()));
 				String line = "";
 				while ((line = reader.readLine()) != null) {
 					gploadOutput_<%=cid%>.append(line);
 					System.out.println(line);
 
 					if(line.contains("|INFO|rows Inserted")){
-						globalMap.put("<%=cid%>_NB_LINE_INSERTED",Integer.parseInt(line.substring(line.indexOf("=")+1).replace(" ","")));
+						globalMap.put("<%=cid%>_NB_LINE_INSERTED",getNBLine(line));
+						nbLine_<%=cid %> += getNBLine(line);
 					} else
 					if(line.contains("|INFO|rows Updated")){
-					      globalMap.put("<%=cid%>_NB_LINE_UPDATED", Integer.parseInt(line.substring(line.indexOf("=")+1).replace(" ","")));
+				    	globalMap.put("<%=cid%>_NB_LINE_UPDATED", getNBLine(line));
+<%
+						if ("UPDATE".equals(dataAction)) {
+%>
+							nbLine_<%=cid %> = getNBLine(line);
+<%
+						}
+						if ("MERGE".equals(dataAction)) {
+%>
+							nbLine_<%=cid %> += getNBLine(line);
+<%
+						}
+%>
 					} else if(line.contains("|INFO|data formatting errors =")){
-					      globalMap.put("<%=cid%>_NB_DATA_ERRORS", Integer.parseInt(line.substring(line.indexOf("=")+1).replace(" ","")));
+					      globalMap.put("<%=cid%>_NB_DATA_ERRORS", getNBLine(line));
 					} else if(line.contains("|INFO|gpload ") && !line.contains("session") && !line.contains("gpload.py") ){
 					      globalMap.put("<%=cid%>_STATUS", line.substring(line.indexOf("gpload ")+7).replace(" ",""));
 					} else if(line.contains("|INFO|running time:")){
@@ -639,28 +668,29 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 
 				}
 
-				reader = new java.io.BufferedReader(new java.io.InputStreamReader(ps.getErrorStream()));
-				line = "";
-				while ((line = reader.readLine()) != null) {
-					gploadOutput_<%=cid%>.append(line);
-					System.out.println(line);
+				globalMap.put("<%=cid%>_NB_LINE", nbLine_<%=cid %>);
 
-					if (line.contains("name 'tableName' is not defined") ) {
+				String errorLine = "";
+				while ((errorLine = errorReader.readLine()) != null) {
+					gploadOutput_<%=cid%>.append(errorLine);
+					System.out.println(errorLine);
 
-						String line1 = "Table (" + <%=dbname%> + "." + <%=dbschema%> + "." + <%=tableName%> + ") is not available in target (" + <%=dbhost%> + ")!";
-						globalMap.put("<%=cid%>_ERRORMESSAGE", line1);
+					if (errorLine.contains("name 'tableName' is not defined") ) {
+
+						String errorLine1 = "Table (" + <%=dbname%> + "." + <%=dbschema%> + "." + <%=tableName%> + ") is not available in target (" + <%=dbhost%> + ")!";
+						globalMap.put("<%=cid%>_ERRORMESSAGE", errorLine1);
 					    if(<%=dieOnError%>){
-					      	throw new RuntimeException ("gpload failed because: " + line1);
+					      	throw new RuntimeException ("gpload failed because: " + errorLine1);
 					    } else {
-					      	System.out.println("WARNING GPLOAD FAILURE:" + line1);
+					      	System.out.println("WARNING GPLOAD FAILURE:" + errorLine1);
 					    }
 					}
-					if (line.toUpperCase().contains("ERROR") ) {
-						globalMap.put("<%=cid%>_ERRORMESSAGE", line);
+					if (errorLine.toUpperCase().contains("ERROR") ) {
+						globalMap.put("<%=cid%>_ERRORMESSAGE", errorLine);
 					    if(<%=dieOnError%>){
-					      	throw new RuntimeException ("gpload failed because: " + line);
+					      	throw new RuntimeException ("gpload failed because: " + errorLine);
 					    } else {
-					      	System.out.println("WARNING GPLOAD FAILURE:" + line);
+					      	System.out.println("WARNING GPLOAD FAILURE:" + errorLine);
 					    }
 					}
 
@@ -669,6 +699,21 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 			catch (java.lang.Exception e) {
 				globalMap.put("<%=cid%>_GPLOAD_ERROR",e.getMessage());
 				throw new RuntimeException(e.getMessage(),e.getCause());
+			}
+		}
+
+		private int getNBLine(String logLine) {
+			try {
+				return Integer.parseInt(logLine.substring(logLine.lastIndexOf("=") + 1).trim());
+			} catch (Exception parseException) {
+<%
+				if (isLog4jEnabled) {
+%>
+					log.warn("Failed to get affected number of lines for <%=cid%>, assuming as 0: " + parseException.getMessage());
+<%
+				}
+%>
+				return 0;
 			}
 		}
 	};
@@ -712,10 +757,9 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 	gploadThread_<%=cid%>.start();
 	gploadThread_<%=cid%>.join(0);
 	globalMap.put("<%=cid%>_GPLOAD_OUTPUT", gploadOutput_<%=cid%>.toString());
-	globalMap.put("<%=cid%>_NB_LINE", insertedCount_<%=cid%>);
 		<%if(isLog4jEnabled){%>
 			log.info("<%=cid%> - Execute '"+command_<%=cid %>.toString()+"' has finished.");
-			log.info("<%=cid%> - Loaded records count:" + insertedCount_<%=cid%> + ".");
+			log.info("<%=cid%> - Loaded records count:" + globalMap.get("<%=cid%>_NB_LINE") + ".");
 		<%}%>
 <%
 	}
