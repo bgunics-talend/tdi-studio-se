@@ -595,7 +595,10 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 				<%
 				String passwordFieldName = "__PASS__";
 				%>
-				
+
+				ps.waitFor();
+				globalMap.put("<%=cid%>_EXIT_CODE", ps.exitValue());
+
 				<%@ include file="@{org.talend.designer.components.localprovider}/components/templates/password.javajet"%>
 			   	
 		        String dbPwd_<%=cid %> = decryptedPassword_<%=cid%>;
