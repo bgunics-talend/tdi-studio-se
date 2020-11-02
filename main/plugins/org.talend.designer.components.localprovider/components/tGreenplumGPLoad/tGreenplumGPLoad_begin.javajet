@@ -138,7 +138,7 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 	//-----------------------------------------------------------
 	// create table option
 	//-----------------------------------------------------------
-	if((columnList != null && columnList.size() > 0) || "CLEAR".equals(tableAction) || "TRUNCATE".equals(tableAction)) {
+	if((columnList != null && columnList.size() > 0 && false == "NONE".equals(tableAction) ) || "CLEAR".equals(tableAction) || "TRUNCATE".equals(tableAction)) {
         Manager manager = getManager(dbmsId, cid);
 		%>
 
@@ -580,8 +580,27 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 					}
 				%>
 				};
-				String[] envparams = new String[] {"PGPASSWORD=\"" + dbPwd_<%=cid %> +"\""};
-				final Process ps = Runtime.getRuntime().exec(cmds,envparams);
+				<%
+				String passwordFieldName = "__PASS__";
+				%>
+				
+				<%@ include file="@{org.talend.designer.components.localprovider}/components/templates/password.javajet"%>
+			   	
+		        String dbPwd_<%=cid %> = decryptedPassword_<%=cid%>;
+
+		        String[] env_<%=cid %> = null;
+				java.util.Map<String, String> envMap_<%=cid %> = System.getenv();
+				java.util.Map<String, String> envMapClone_<%=cid %> = new java.util.HashMap();
+				envMapClone_<%=cid %>.putAll(envMap_<%=cid %>);
+				envMapClone_<%=cid %>.put("PGPASSWORD", dbPwd_<%=cid %>);
+
+				env_<%=cid %> = new String[envMapClone_<%=cid %>.size()];
+				int i_<%=cid %> = 0;
+				for (String envKey : (java.util.Set<String>) envMapClone_<%=cid %>.keySet()) {
+					env_<%=cid %>[i_<%=cid %>++] = envKey + "=" + envMapClone_<%=cid %>.get(envKey);
+				}
+
+				final Process ps = Runtime.getRuntime().exec(cmds,env_<%=cid %>);
 				
 				java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(ps.getInputStream()));
 				String line = "";
@@ -594,7 +613,7 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 				line = "";
 				while ((line = reader.readLine()) != null) {
 					gploadOutput_<%=cid%>.append(line);
-					System.out.println(line);
+					System.err.println(line);
 				}
 			}
 			catch (java.lang.Exception e) {
