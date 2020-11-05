@@ -64,7 +64,7 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 	boolean gploadpyPathGiven = ElementParameterParser.getValue(node, "__SPECIFY_GPLOADPY_PATH__").equals("true");
 	String gploadpyPath = ElementParameterParser.getValue(node, "__GPLOADPY_PATH__");
 	
-	
+	boolean guessColumnList = ("true").equals(ElementParameterParser.getValue(node,"__GUESS_COLUMN_LIST__"));
 	
 	String dbmsId = ElementParameterParser.getValue(node,"__MAPPING__");
 	boolean dieOnError = ("true").equals(ElementParameterParser.getValue(node,"__DIE_ON_ERROR__"));
@@ -375,29 +375,18 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 	
 	if (useExistingCtrlFile) {
 		%>
-		String gploadCtrlFile = <%=ctrlFile%>;
+		String gploadCtrlFile_<%=cid%> = <%=ctrlFile%>;
 		<%
 	} else {
 		%>
-		String gploadCtrlFile = "gp_ctrl_" + "<%=cid%>" + pid + Thread.currentThread().getId() + ".txt";
+		String gploadCtrlFile_<%=cid%> = "gp_ctrl_" + "<%=cid%>" + pid + Thread.currentThread().getId() + ".txt";
 
 		String delim_<%=cid%> = <%=fieldSeparator%>;
 		String escape_<%=cid%> = <%=escapeChar%>;
 		String quote_<%=cid%> = <%=quoteChar%>;
 		delim_<%=cid%> = "\t".equals(delim_<%=cid%>) ? "\\t" : delim_<%=cid%>;
-		
-		String directory_<%=cid%> = <%=gploadCtrlFile%>;
-		if(directory_<%=cid%> != null && directory_<%=cid%>.trim().length() != 0 
-	    		&& directory_<%=cid%>.replace("\\","/").contains("/")) {
-	    	directory_<%=cid%> = directory_<%=cid%>.substring(0, directory_<%=cid%>.replace("\\","/").lastIndexOf("/"));
-	    	java.io.File dir_<%=cid%> = new java.io.File(directory_<%=cid%>);
-	        	if(!dir_<%=cid%>.exists()) {
-					dir_<%=cid%>.mkdirs();
-					System.out.println("Created Directory:" + dir_<%=cid%>);
-	            }
-	    }
 
-		try (java.io.PrintWriter gpctrl_<%=cid%> = new java.io.PrintWriter(new java.io.FileOutputStream(gploadCtrlFile, false), true)){
+		try (java.io.PrintWriter gpctrl_<%=cid%> = new java.io.PrintWriter(new java.io.FileOutputStream(gploadCtrlFile_<%=cid%>, false), true)){
 			gpctrl_<%=cid%>.println("---");
 			gpctrl_<%=cid%>.println("VERSION: 1.0.0.1");
 			gpctrl_<%=cid%>.println("DATABASE: " + <%=dbname%>);
@@ -450,6 +439,8 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 			<% } else { %>
 			gpctrl_<%=cid%>.println("          - " + <%=dataFile%>);
 			<% } %>
+
+
 			gpctrl_<%=cid%>.println("    - DELIMITER: '" + delim_<%=cid%> + "'");
 			gpctrl_<%=cid%>.println("    - ESCAPE: '" + escape_<%=cid%> + "'");
 			
@@ -479,6 +470,45 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 							gpctrl_<%=cid%>.println("    - ERROR_TABLE: '" + <%=value%> + "'");
 						<%
 					}
+					if (key.equals("LOG_ERRORS")){
+						%>
+							gpctrl_<%=cid%>.println("    - LOG_ERRORS: " + <%=value%> );
+						<%
+					}
+					if (key.equals("MAX_LINE_LENGTH")){
+						%>
+							gpctrl_<%=cid%>.println("    - MAX_LINE_LENGTH: " + <%=value%> );
+						<%
+					}
+				}
+			}
+			%>
+
+			<%
+			if(guessColumnList) {
+			%>
+				gpctrl_<%=cid%>.println("    - COLUMNS:");
+				//iterate on schema.
+			<%
+				//pass the columnlist
+				List<IMetadataTable> metadataList = node.getMetadataList();
+				if ((metadataList != null) && (metadataList.size() > 0)) {
+				  IMetadataTable metadataTable = metadataList.get(0);
+				  if (metadataTable != null) {
+				  	java.util.HashMap <String,String> columnTypeHashMap = new java.util.HashMap<String,String>();
+				  	columnTypeHashMap.put("id_String","text");
+				  	columnTypeHashMap.put("id_byte[]","bytea");
+				  	columnTypeHashMap.put("id_Date","timestamp");
+				  	columnTypeHashMap.put("id_BigDecimal","numeric (500,100)");
+				  	columnTypeHashMap.put("id_Double","numeric (500,100)");
+				  	columnTypeHashMap.put("id_Integer","integer");
+				  	for (IMetadataColumn metadataColumn : metadataTable.getListColumns()) {
+				  		String dbTypeOfColumn = metadataColumn.getType();
+			%>
+					gpctrl_<%=cid%>.println("        - <%=metadataColumn.getOriginalDbColumnName()%> : <%=columnTypeHashMap.get(metadataColumn.getTalendType() )%>");
+			<%
+					}
+				  }
 				}
 			}
 			%>
@@ -493,6 +523,23 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 			gpctrl_<%=cid%>.println("    - HEADER: true");
 			<% } %>
 			gpctrl_<%=cid%>.println("    - ENCODING: " + <%=encoding%>);
+
+			<%
+			for (Map<String, String> option : options) {
+				String key = option.get("KEY");
+				String value = option.get("VALUE");
+				
+				if(value != null && !("".equals(value))) {
+					if (key.equals("EXTERNAL_SCHEMA")){
+						%>
+							gpctrl_<%=cid%>.println("  EXTERNAL:");
+							gpctrl_<%=cid%>.println("    - SCHEMA: '" + <%=value%> + "'");
+						<%
+					}
+				}
+			}
+			%>
+
 			gpctrl_<%=cid%>.println("  OUTPUT: ");
 			gpctrl_<%=cid%>.println("    - TABLE: '" + tableName4Load_<%=cid%>+"'");
 			gpctrl_<%=cid%>.println("    - MODE: <%=dataAction.toLowerCase()%>");
@@ -528,13 +575,66 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 					<%
 				}
 			}
+
+			List<String> preload = new ArrayList<String>();
+			for (Map<String, String> option : options) {
+				String key = option.get("KEY");
+				String value = option.get("VALUE");
+				
+				if(value != null && !("".equals(value))) {
+					if (key.equals("PRELOAD_TRUNCATE")){
+							preload.add("    - TRUNCATE: " + value );
+					}
+					if (key.equals("PRELOAD_TRUNCATE")){
+							preload.add("    - REUSE_TABLES: " + value );
+					}
+					if (key.equals("PRELOAD_STAGING_TABLE")){
+							preload.add("    - STAGING_TABLE: '\"+" + value +"+\"'");
+					}
+					if (key.equals("PRELOAD_FAST_MATCH")){
+							preload.add("    - FAST_MATCH: " + value );
+					}
+				}
+			}
+			if(preload.size() >0) {
 			%>
+				gpctrl_<%=cid%>.println("  PRELOAD:");
+				<%for (String line : preload) {%>
+				gpctrl_<%=cid%>.println("<%=line%>");
+				<%}
+			}
+
+			List<String> sqlBeforeOrAfter = new ArrayList<String>();
+			for (Map<String, String> option : options) {
+				String key = option.get("KEY");
+				String value = option.get("VALUE");
+				
+				if(value != null && !("".equals(value))) {
+					if (key.equals("SQL_BEFORE")){
+							sqlBeforeOrAfter.add("    - BEFORE: \\\"\"+(" + value +")+\"\\\"");
+					}
+					if (key.equals("SQL_AFTER")){
+							sqlBeforeOrAfter.add("    - AFTER: \\\"\"+(" + value +")+\"\\\"");
+					}
+				}
+			}
+			if(sqlBeforeOrAfter.size() > 0) {
+			%>
+				gpctrl_<%=cid%>.println("  SQL:");
+				<%for (String line : sqlBeforeOrAfter) {%>
+				gpctrl_<%=cid%>.println("<%=line%>");
+				<%}
+			}
+			%>
+
 		}
 		<%
 	}
 
 	
 	List<String> parametersList = new ArrayList();
+	parametersList.add("\"-f\"");
+	parametersList.add("gploadCtrlFile_"+cid);
 	parametersList.add("\"-h\"");
 	parametersList.add(dbhost);
 	parametersList.add("\"-p\"");
@@ -585,19 +685,16 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 							<%=pythonPathForCMD%>,
 						<%}%>
 						<%=gpLoadPathForCMD%>
-						, "-f", gploadCtrlFile
 				<%
 				for (int i=0; i < parametersList.size(); i++) {
-						%>,<%=parametersList.get(i)%><%
+						%>,<%=parametersList.get(i)%>
+						<%
 					}
 				%>
 				};
 				<%
 				String passwordFieldName = "__PASS__";
 				%>
-
-				ps.waitFor();
-				globalMap.put("<%=cid%>_EXIT_CODE", ps.exitValue());
 
 				<%@ include file="@{org.talend.designer.components.localprovider}/components/templates/password.javajet"%>
 			   	
@@ -728,7 +825,10 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 	// component is used in startable mode.
 	//-----------------------------------------------------------------
 	if(isLog4jEnabled){%>
-		StringBuffer command_<%=cid%> = new StringBuffer(<%=gpLoadPathForCMD%>);
+		StringBuffer command_<%=cid%> = new StringBuffer(
+			<%if (!"".equals(pythonPathForCMD)){%>
+				<%=pythonPathForCMD%>+
+			<%}%><%=gpLoadPathForCMD%>+" ");
 		<%
 		for (int i=0; i < parametersList.size(); i++) {
 		%>
