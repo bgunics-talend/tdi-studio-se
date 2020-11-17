@@ -56,6 +56,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.talend.commons.exception.ExceptionHandler;
 import org.talend.commons.exception.PersistenceException;
@@ -158,6 +159,10 @@ public class JobJavaScriptOSGIForESBManager extends JobJavaScriptsManager {
     private static final String JAVA = "java"; //$NON-NLS-1$
 
     private static final String JAVA_VERSION = "java.version";
+
+    private static File routineClassRootFolder = null;
+
+    private static File beanClassRootFolder = null;
 
     private MultiKeyMap requireBundleModules = new MultiKeyMap();
 
@@ -341,7 +346,7 @@ public class JobJavaScriptOSGIForESBManager extends JobJavaScriptsManager {
 
     private List<ExportFileResource> cleanupResources(Stream<IComponent> components, List<ExportFileResource> resources, ITaCoKitDependencyService service) {
         Set<String> tckOnly = service.getTaCoKitOnlyDependencies(components);
-        final List<ExportFileResource> rmResources = new ArrayList<>();
+        //final List<ExportFileResource> rmResources = new ArrayList<>();
         //This code is nicer but have to reiterate after, so not so efficient
 //        List<URL> rmDeps = resources.stream()
 //                .filter(rf -> "lib".equals(rf.getDirectoryName()))
@@ -373,16 +378,21 @@ public class JobJavaScriptOSGIForESBManager extends JobJavaScriptsManager {
     protected void addRoutinesResources(ExportFileResource[] processes, ExportFileResource libResource) {
         File jarFile = new File(getTmpFolder() + File.separatorChar + JavaUtils.ROUTINES_JAR);
 
+        if (routineClassRootFolder == null) {
+            routineClassRootFolder = getCodeClassRootFileLocation(ERepositoryObjectType.ROUTINES);
+            if (routineClassRootFolder == null) {
+                return;
+            }
+            beanClassRootFolder = getCodeClassRootFileLocation(ERepositoryObjectType.BEANS);
+            RepositoryPlugin.getDefault().getRunProcessService().buildCodesJavaProject(new NullProgressMonitor());
+        }
+        if (beanClassRootFolder != null) {
+            FileCopyUtils.copyFolder(beanClassRootFolder, routineClassRootFolder);
+        }
+
         // make a jar file of system routine classes
-        File classRootFileLocation = getCodeClassRootFileLocation(ERepositoryObjectType.ROUTINES);
-        if (classRootFileLocation == null) {
-            return;
-        }
-        if (ERepositoryObjectType.valueOf("BEANS") != null) {
-            FileCopyUtils.copyFolder(getCodeClassRootFileLocation(ERepositoryObjectType.valueOf("BEANS")), classRootFileLocation);
-        }
         try {
-            JarBuilder jarbuilder = new JarBuilder(classRootFileLocation, jarFile);
+            JarBuilder jarbuilder = new JarBuilder(routineClassRootFolder, jarFile);
             jarbuilder.setIncludeDir(getRoutinesPaths());
             Collection<File> includeRoutines = new ArrayList<File>(getRoutineDependince(processes, true, USER_ROUTINES_PATH));
             includeRoutines.addAll(getRoutineDependince(processes, false, getIncludeRoutinesPath()));
@@ -924,10 +934,12 @@ public class JobJavaScriptOSGIForESBManager extends JobJavaScriptsManager {
             Set<URL> resources = libResource.getResourcesByRelativePath(path);
             for (URL url : resources) {
                 // TESB-21804:Fail to deploy cMessagingEndpoint with quartz component in runtime for ClassCastException
-                if (url.getPath().matches("(.*)camel-(.*)-alldep-(.*)$") 
-                        || url.getPath().matches("(.*)activemq-all-[\\d\\.]*.jar$")
-                        || url.getPath().matches("(.*)jms[\\d\\.-]*.jar$")
-                        || url.getPath().matches("(.*)tdm-lib-di-[\\d\\.-]*.jar$")) {
+                String urlStr = url.getPath().replace("\\", "/");
+                if (urlStr.matches("(.*)camel-(.*)-alldep-(.*)$") 
+                        || urlStr.matches("(.*)activemq-all-[\\d\\.]*.jar$")
+                        || urlStr.matches("(.*)/jms[\\d\\.-]*.jar$")
+                        || urlStr.matches("(.*)tdm-lib-di-[\\d\\.-]*.jar$")
+                        || urlStr.matches("(.*)dom4j-[\\d\\.-]*.jar$")) {
                     continue;
                 }
                 File dependencyFile = new File(FilesUtils.getFileRealPath(url.getPath()));
