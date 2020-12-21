@@ -59,7 +59,6 @@ String childJob = ElementParameterParser.getValue(node,"__PROCESS__");
 
 // COVEA option extra class path
 String extraClassPath = ElementParameterParser.getValue(node,"__EXTRA_CLASSPATH__");
-boolean firstClassPath = false; 
 
 // COVEA use context from orchestration
 boolean useOrchestrationContext = ("true").equals(ElementParameterParser.getValue(node, "__USE_ORCHESTRATION_CONTEXT__"));  
@@ -228,6 +227,7 @@ String inputConnName = null;
 		      				%>
 		      					String classpath_<%=cid %>_<%=i %> = <%=commandLineWindows[i] %>;
 		      					<%if(isCP && (commandLineWindows[i].endsWith(":\"") || commandLineWindows[i].endsWith(";\""))) {%>
+		      					classpath_<%=cid %>_<%=i %> = <%=extraClassPath%>+classpath_<%=cid %>_<%=i %>;
 		      					if(audit_jar_path_<%=cid %>!=null && !audit_jar_path_<%=cid %>.isEmpty()) {
 		      						classpath_<%=cid %>_<%=i %> += audit_jar_path_<%=cid %>;
 		      					}
@@ -250,6 +250,7 @@ String inputConnName = null;
               				%>
               					String classpath_<%=cid %>_<%=i %> = "<%=commandLineWindows[i] %>";
               					<%if(isCP && (commandLineWindows[i].endsWith(":") || commandLineWindows[i].endsWith(";"))) {%>
+              					classpath_<%=cid %>_<%=i %> = <%=extraClassPath%>+classpath_<%=cid %>_<%=i %>;
               					if(audit_jar_path_<%=cid %>!=null && !audit_jar_path_<%=cid %>.isEmpty()) {
 		      						classpath_<%=cid %>_<%=i %> += audit_jar_path_<%=cid %>;
 		      					}
@@ -308,6 +309,7 @@ String inputConnName = null;
 		      				%>
 		      					String classpath_<%=cid %>_<%=i %> = <%=param %>;
 		      					<%if(isCP && (param.endsWith(":\"") || param.endsWith(";\""))) {%>
+		      					classpath_<%=cid %>_<%=i %> = <%=extraClassPath%>+classpath_<%=cid %>_<%=i %>;
 		      					if(audit_jar_path_<%=cid %>!=null && !audit_jar_path_<%=cid %>.isEmpty()) {
 		      						classpath_<%=cid %>_<%=i %> += audit_jar_path_<%=cid %>;
 		      					}
@@ -322,6 +324,7 @@ String inputConnName = null;
 		      				%>
 		      					String classpath_<%=cid %>_<%=i %> = <%=param %>;
 		      					<%if(isCP && (param.endsWith(":\"") || param.endsWith(";\""))) {%>
+		      					classpath_<%=cid %>_<%=i %> = <%=extraClassPath%>+classpath_<%=cid %>_<%=i %>;
 		      					if(audit_jar_path_<%=cid %>!=null && !audit_jar_path_<%=cid %>.isEmpty()) {
 		      						classpath_<%=cid %>_<%=i %> += audit_jar_path_<%=cid %>;
 		      					}
