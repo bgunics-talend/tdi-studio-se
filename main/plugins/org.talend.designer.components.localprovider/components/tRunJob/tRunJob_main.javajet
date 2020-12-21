@@ -177,27 +177,19 @@ String inputConnName = null;
 				if (i == 0){
 					childJob = commandLine[0];
 				} else if (i > 0){
-					if (commandLine[i].indexOf("\"") >= 0){
-						if(commandLine[i].indexOf("--context=")>=0 && useOrchestrationContext){
-	      			%>
-							paraList_<%=cid %>.add("--context="+<%=varCustomContext %>);
-						<%
-						} else{
+					if(commandLine[i].indexOf("--context=")>=0 && useOrchestrationContext){
+					%>
+						paraList_<%=cid %>.add("--context="+<%=varCustomContext %>);
+					<%
+					} else if (commandLine[i].indexOf("\"") >= 0){
 						%>
 	        			paraList_<%=cid %>.add(<%=commandLine[i] %>);
 						<%
-						}
 					} else{
-						if(commandLine[i].indexOf("--context=")>=0 && useOrchestrationContext){
-						%>
-							paraList_<%=cid %>.add("--context="+<%=varCustomContext %>);
-						<%
-						}else{
 						%>
 	        			paraList_<%=cid %>.add("<%=commandLine[i] %>");
 						<%
-	    		}
-	  		}
+	  				}
 	    		}
 	  		}
 		} else {
@@ -211,61 +203,32 @@ String inputConnName = null;
 		      			paraList_<%=cid %>.add("<%=commandLineWindows[i]%>");
 		      		<%
 					} else if (i > 0){
-		      			if (commandLineWindows[i].indexOf("\"") >= 0){
-							if(commandLineWindows[i].indexOf(".jar")>=0){
-								if(firstClassPath){
-		      				%>
-								jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>,<%=extraClassPath%>+ dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=commandLineWindows[i] %>));
-		      				<%
-									firstClassPath = false;
-								}else{		          			
-	              				%>
-			        				jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=commandLineWindows[i] %>));
-
-			      				<%
-			      				}
-							}else{
-								if(commandLineWindows[i].indexOf("--context=")>=0 && useOrchestrationContext){
+						if(commandLineWindows[i].indexOf("--context=")>=0 && useOrchestrationContext){
 		      				%>
 		      					jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, "--context="+<%=varCustomContext %>);
 		      				<%
-								}else{
-								%>
-									jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, <%=commandLineWindows[i] %>);
-
-								<%
-		          			}
+						} else if (commandLineWindows[i].indexOf("\"") >= 0){
+							if(commandLineWindows[i].indexOf(".jar")>=0){
+		      				%>
+								jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=commandLineWindows[i] %>));
+		      				<%
+							}else{
+		      				%>
+		      					jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, <%=commandLineWindows[i] %>);
+		      				<%
 		          			}
 		      			}else{
 		          			if(commandLineWindows[i].indexOf(".jar")>=0){
-								if(firstClassPath){
               				%>
-		        				jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, <%=extraClassPath%>+dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap("<%=commandLineWindows[i] %>"));
+		        				jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap("<%=commandLineWindows[i] %>"));
 		      				<%
-									firstClassPath = false;
-								}else{		          			
-	              				%>
-			        				jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap("<%=commandLineWindows[i] %>"));
-
-			      				<%
-			      				}
 		          			}else{
-								if(commandLineWindows[i].indexOf("--context=")>=0 && useOrchestrationContext){
               				%>
-		      					jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, "--context="+<%=varCustomContext %>);
+		      					jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, "<%=commandLineWindows[i] %>");
 		      				<%
-								}else{
-								%>
-									jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, "<%=commandLineWindows[i] %>");
-
-								<%
-		          			}
 		          			}
 		      			}	
 		    		}
-					if(commandLineWindows[i].indexOf("-cp")>=0){
-						firstClassPath = true;
-		  		}
 		  		}
 		  		%>
 			} else {
@@ -282,51 +245,25 @@ String inputConnName = null;
 						} else {
 							param = "\""+commandLineUnix[i]+"\"";
 						}
-						if (param.contains("$ROOT_PATH")) {
-							if(param.indexOf(".jar") >= 0){
-								if(firstClassPath){
-		      					%>
-									jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>,<%=extraClassPath%>+dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=param %>).replace("$ROOT_PATH",System.getProperty("user.dir")));
-								<%
-									firstClassPath = false;
-								}else{
-			      				%>
-									jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=param %>).replace("$ROOT_PATH",System.getProperty("user.dir")));
-								<%
-		      					}
-		      				}else{
+						if(param.indexOf("--context=")>=0 && useOrchestrationContext){
 		      				%>
+		      					jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, "--context="+<%=varCustomContext %>);
+		      				<%
+						} else if (param.contains("$ROOT_PATH")) {
+							if(param.indexOf(".jar") >= 0){
+		      				%>
+								jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=param %>).replace("$ROOT_PATH",System.getProperty("user.dir")));
+		      				<%}else{%>
 		        				jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, <%=param %>.replace("$ROOT_PATH",System.getProperty("user.dir")));
 		     	 			<%
 		      				}
 		      			}else{
 							if(param.indexOf(".jar") >= 0){
-
-								if(firstClassPath){
 		      				%>
-		      					jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>,<%=extraClassPath%>+ dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=param %>).replace("$ROOT_PATH",System.getProperty("user.dir")));
-
-							<%
-									firstClassPath = false;
-								}else{
-			      				%>
 		      					jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, dealChildJobLibrary_<%=cid %>.replaceJarPathsFromCrcMap(<%=param %>).replace("$ROOT_PATH",System.getProperty("user.dir")));
-
-			      				<%}
-							}else{
-								if(commandLineWindows[i].indexOf("--context=")>=0 && useOrchestrationContext){
-								%>
-   								jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>,"--context="+<%=varCustomContext %>);
-
-								<%
-								}else{
-								%>
-									jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, <%=param %>);
+		      				<%}else{%>
+								jvm_argument_helper_<%=cid%>.addArgumentsTo(paraList_<%=cid %>, <%=param %>);
 		      				<%
-		      				}
-			          			if(commandLineWindows[i].indexOf("-cp")>=0){
-									firstClassPath = true;
-			      				}
 		      				}
 		      			}	
 	    			}
