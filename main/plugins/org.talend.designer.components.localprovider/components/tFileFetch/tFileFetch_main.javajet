@@ -8,7 +8,7 @@
 		java.util.Map
 	"
 %>
-<%@ include file="../templates/Log4j/Log4jFileUtil.javajet"%>
+<%@ include file="@{org.talend.designer.components.localprovider}/components/templates/Log4j/Log4jFileUtil.javajet"%>
 <%
 CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
 INode node = (INode)codeGenArgument.getArgument();
@@ -668,8 +668,14 @@ if ("http".equals(protocol) || "https".equals(protocol)) {
 		password_<%=cid %> = null;
 	}
 	
-	try {        
-		jcifs.smb.NtlmPasswordAuthentication auth_<%=cid%> = new jcifs.smb.NtlmPasswordAuthentication(<%=domain %>, username_<%=cid %>, password_<%=cid %>);
+	try {
+		java.util.Properties props_<%=cid%> = new java.util.Properties();
+		//https://www.qvera.com/kb/index.php/2243/what-are-the-network-share-configuration-parameters
+		props_<%=cid%>.put("jcifs.smb.client.maxVersion","SMB311");
+
+		jcifs.CIFSContext auth_<%=cid%> = new jcifs.context.BaseContext(new jcifs.config.PropertyConfiguration(props_<%=cid%>));
+		auth_<%=cid%> = auth_<%=cid%>.withCredentials(new jcifs.smb.NtlmPasswordAuthenticator(<%=domain%>, username_<%=cid %>, password_<%=cid%>));
+
 		jcifs.smb.SmbFile sf_<%=cid%> = new jcifs.smb.SmbFile(srcurl_<%=cid %>, auth_<%=cid%>);
 	
 		<%if (bUseCache) {%>
