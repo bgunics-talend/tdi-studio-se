@@ -694,16 +694,24 @@ if ("http".equals(protocol) || "https".equals(protocol)) {
 			in_<%=cid%>.close();
 			out_<%=cid%>.close();
 			} catch (java.io.FileNotFoundException ex) {
-				<%if(isLog4jEnabled){%>
-					log.error("<%=cid%> - " + ex.getMessage());
-				<%}%>
-				System.err.println(ex.getMessage());
-		<%}%> 
+				<% if (bDieOnError) {%>    
+					throw(ex);
+				<%} else {
+					if(isLog4jEnabled){%>
+						log.error("<%=cid%> - " + ex.getMessage());
+					<%}%>
+					System.err.println(ex.getMessage());
+				<%}
+		}%> 
 	} catch (java.lang.Exception e) {
-		<%if(isLog4jEnabled){%>
-			log.error("<%=cid%> - " + e.getMessage());
+		<% if (bDieOnError) {%>    
+				throw(e);
+		<%} else {
+			if(isLog4jEnabled){%>
+				log.error("<%=cid%> - " + e.getMessage());
+			<%}%>
+			System.err.println(e.getMessage());
 		<%}%>
-		System.err.println(e.getMessage());
 	}
 <%}%>
 <%if (bUseCache) {%>
