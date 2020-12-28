@@ -102,7 +102,7 @@ skeleton="@{org.talend.designer.components.localprovider}/components/templates/d
 %>
 	String dataFile_<%=cid%> = <%=dataFile%>;
 <%
-	if(useGzip) {
+	if(useGzip && hasInputRow) {
 		//make sure it ends with .gz
 %>
 	if(!dataFile_<%=cid%>.endsWith(".gz")) {
