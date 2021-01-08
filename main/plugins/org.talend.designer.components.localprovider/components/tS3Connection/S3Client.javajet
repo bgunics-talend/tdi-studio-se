@@ -62,7 +62,7 @@
 		<%
 		} else {
 		%>
-		com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%> = new com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper();
+		com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%> = new com.amazonaws.auth.DefaultAWSCredentialsProviderChain();
 		<%
 		}
 		
