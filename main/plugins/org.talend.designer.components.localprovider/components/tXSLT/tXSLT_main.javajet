@@ -20,12 +20,11 @@ String outputFile = ElementParameterParser.getValue(node, "__OUTPUT_FILE__");
 List<Map<String, String>> params = (List<Map<String,String>>)ElementParameterParser.getObjectValue(node,"__PARAMS__");
 %>
 	Object xslFile_<%=cid%> = <%=xslFile%>;
-	javax.xml.transform.stream.StreamSource = null;
+	javax.xml.transform.stream.StreamSource styleSource<%=cid%> = null;
 	if(xslFile_<%=cid%> instanceof java.io.InputStream){
 		styleSource<%=cid%> = new javax.xml.transform.stream.StreamSource( (java.io.InputStream)xslFile_<%=cid%>);	
 	} else {
-		java.io.File xsltFile<%=cid%> = new java.io.File(<%=xslFile%>);
-		styleSource<%=cid%> = new javax.xml.transform.stream.StreamSource(xsltFile<%=cid%>);
+		styleSource<%=cid%> = new javax.xml.transform.stream.StreamSource(new java.io.File((String)xslFile_<%=cid%>));
 	}
 	javax.xml.transform.Transformer t<%=cid%> = javax.xml.transform.TransformerFactory.newInstance(net.sf.saxon.TransformerFactoryImpl.class.getName(), null).newTransformer(styleSource<%=cid%>);
 
@@ -44,8 +43,7 @@ List<Map<String, String>> params = (List<Map<String,String>>)ElementParameterPar
 	if(xmlFile_<%=cid%> instanceof java.io.InputStream){
 		xmlSource<%=cid%> = new javax.xml.transform.stream.StreamSource( (java.io.InputStream)xmlFile_<%=cid%>);	
 	} else {
-		java.io.File xsltFile<%=cid%> = new java.io.File(<%=xslFile%>);
-		xmlSource<%=cid%> = new javax.xml.transform.stream.StreamSource(new java.io.File(<%=xmlFile%>));
+		xmlSource<%=cid%> = new javax.xml.transform.stream.StreamSource(new java.io.File((String) xmlFile_<%=cid%>));
 	}
 
 	t<%=cid%>.transform(xmlSource<%=cid%>, new javax.xml.transform.stream.StreamResult(new java.io.File(<%=outputFile%>)));
