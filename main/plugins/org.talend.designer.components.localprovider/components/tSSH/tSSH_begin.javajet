@@ -48,6 +48,7 @@ if ((metadatas!=null)&&(metadatas.size()>0)) {
 			log.info("<%=cid%> - Connection attempt to '" +hostname_<%=cid%> + "' on the port '"+<%=port%>+"' as '" + username_<%=cid%> + "'.");
 		<%}%>
 		org.apache.sshd.client.SshClient client_<%=cid%> = org.apache.sshd.client.SshClient.setUpDefaultClient();
+		client_<%=cid%>.getProperties().put(org.apache.sshd.client.ClientFactoryManager.HEARTBEAT_INTERVAL, "500");
 		<%if ("true".equals(useTimeout)) { %>
 			client_<%=cid%>.getProperties().putIfAbsent(org.apache.sshd.common.FactoryManager.IDLE_TIMEOUT, 
 				java.util.concurrent.TimeUnit.SECONDS.toMillis(java.lang.Long.valueOf(<%=timeout%>)));
