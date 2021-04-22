@@ -18,7 +18,6 @@ imports="
 	if (authMode.equals("OAUTH") || authMode.equals("TOKEN")) {
 	%>
 			}
-		pageToken_<%=cid%> = dataList_<%=cid %>.getPageToken();
 		if (null == pageToken_<%=cid%>) {
 			break;
 		}

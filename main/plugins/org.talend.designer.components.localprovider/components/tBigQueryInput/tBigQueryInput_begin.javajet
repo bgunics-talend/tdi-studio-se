@@ -444,15 +444,25 @@
     <% if(authMode.equals("TOKEN") && !ElementParameterParser.canEncrypt(node, "__ACCESS_TOKEN__")) { %>
     credential_<%=cid%>.setAccessToken(<%= ElementParameterParser.getValue(node, "__ACCESS_TOKEN__")%>);
     <% } %>
-		com.google.api.services.bigquery.model.TableDataList dataList_<%=cid %> = bigqueryclient_<%=cid%>.tabledata()
+		List<com.google.api.services.bigquery.model.TableRow> rows_<%=cid %>;
+		if(insert_<%=cid %>.getConfiguration().getQuery().getDestinationTable() != null) {
+			com.google.api.services.bigquery.model.TableDataList dataList_<%=cid %> = bigqueryclient_<%=cid%>.tabledata()
 					.list(PROJECT_ID_<%=cid %>,
 							insert_<%=cid %>.getConfiguration().getQuery()
 									.getDestinationTable().getDatasetId(),
 							insert_<%=cid %>.getConfiguration().getQuery()
 									.getDestinationTable().getTableId())
 					.setPageToken(pageToken_<%=cid%>).execute();
-
-		List<com.google.api.services.bigquery.model.TableRow> rows_<%=cid %> = dataList_<%=cid %>.getRows();
+			rows_<%=cid %> = dataList_<%=cid %>.getRows();
+			pageToken_<%=cid%> = dataList_<%=cid %>.getPageToken();
+		} else { //fallback to GetQueryResultsResponse
+			com.google.api.services.bigquery.model.GetQueryResultsResponse queryResult_<%=cid %> = bigqueryclient_<%=cid %>.jobs()
+					.getQueryResults(PROJECT_ID_<%=cid %>, insert_<%=cid %>.getJobReference().getJobId())
+					.setPageToken(pageToken_<%=cid%>)
+					.execute();
+			rows_<%=cid %> = queryResult_<%=cid %>.getRows();
+			pageToken_<%=cid%> = queryResult_<%=cid %>.getPageToken();
+		}
 		if(rows_<%=cid %> == null) {
 			// Means there is no record.
 			rows_<%=cid %> = new java.util.ArrayList<com.google.api.services.bigquery.model.TableRow>();
