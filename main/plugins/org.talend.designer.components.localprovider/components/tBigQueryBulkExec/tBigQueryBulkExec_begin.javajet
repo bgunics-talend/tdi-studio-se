@@ -587,6 +587,8 @@
       cred_<%=cid%>.setAccessToken(<%= ElementParameterParser.getValue(node, "__ACCESS_TOKEN__")%>);
       <% } %>
 			com.google.api.services.bigquery.model.Job doneJob_<%=cid%> = pollJob_<%=cid%>;
+			globalMap.put("<%=cid%>_JOBID",doneJob_<%=cid%>.getJobReference().getJobId());
+			globalMap.put("<%=cid%>_STATISTICS", doneJob_<%=cid%>.getStatistics().toString());
 
 			if ((doneJob_<%=cid%>.getStatus() != null) && (doneJob_<%=cid%>.getStatus().getErrors() != null)) {
 				status = "failure";
@@ -812,6 +814,8 @@
 			loadJobBuilder_<%=cid%>.setNullMarker(<%= nullMarker %>);
 			com.google.cloud.bigquery.Job job_<%=cid%> = bigquery_<%=cid%>.create(com.google.cloud.bigquery.JobInfo.of(loadJobBuilder_<%=cid%>.build()));
 			job_<%=cid%> = job_<%=cid%>.waitFor(com.google.cloud.RetryOption.initialRetryDelay(org.threeten.bp.Duration.ofSeconds(1)));
+			globalMap.put("<%=cid%>_JOBID",job_<%=cid%>.getJobReference().getJobId());
+			globalMap.put("<%=cid%>_STATISTICS", job_<%=cid%>.getStatistics().toString());
 			if (job_<%=cid%> != null && job_<%=cid%>.getStatus().getError() == null) {
 				<%
 				if(isLog4jEnabled){
