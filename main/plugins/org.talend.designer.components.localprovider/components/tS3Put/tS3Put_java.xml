@@ -541,6 +541,20 @@
 	        <ITEM NAME="BUCKET_OWNER_FULL_CONTROL" VALUE="&quot;BucketOwnerFullControl&quot;" />
           </ITEMS>
         </PARAMETER>
+
+        <PARAMETER
+          NAME="OBJECT_METADATA"
+          FIELD="TABLE"
+          NUM_ROW="110"
+          NB_LINES="5"
+          REQUIRED="true"
+        >
+          <ITEMS>
+            <ITEM NAME="KEY" />
+            <ITEM NAME="VALUE" />
+          </ITEMS>
+        </PARAMETER>
+
     </ADVANCED_PARAMETERS>
 
    <CODEGENERATION>

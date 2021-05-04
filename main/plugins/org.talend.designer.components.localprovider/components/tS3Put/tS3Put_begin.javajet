@@ -32,6 +32,8 @@ imports="
 	List<Map<String, String>> paramsACL = ElementParameterParser.getTableValue(node,"__ACL__");
 	final String cannedACL = ElementParameterParser.getValue(node, "__CANNED_ACCESS_CONTROL_LIST__");
 	final boolean enableCannedACL = (cannedACL != null) && (!cannedACL.isEmpty()) && !("\"NONE\"".equals(cannedACL));
+
+	List<Map<String, String>> objectMetadataTable = ElementParameterParser.getTableValue(node,"__OBJECT_METADATA__");
 	%>
 	<%@ include file="../tS3Connection/S3Client.javajet" %>
 	String key_<%=cid%> = <%=key%>;
@@ -67,9 +69,14 @@ imports="
 		    useStream_<%=cid%> = true;
 		}
 		
-    com.amazonaws.services.s3.model.ObjectMetadata objectMetadata_<%=cid%> = new com.amazonaws.services.s3.model.ObjectMetadata();
-		
+    	com.amazonaws.services.s3.model.ObjectMetadata objectMetadata_<%=cid%> = new com.amazonaws.services.s3.model.ObjectMetadata();
 		<%
+		for (Map<String, String> objectMeta : objectMetadataTable) {
+		%>
+			objectMetadata_<%=cid%>.addUserMetadata(<%=objectMeta.get("KEY")%>, <%=objectMeta.get("VALUE")%>);
+		<%
+		}
+
 		if(!enableKMS && enableServerSideEncryption){
 		%>
 				<%
