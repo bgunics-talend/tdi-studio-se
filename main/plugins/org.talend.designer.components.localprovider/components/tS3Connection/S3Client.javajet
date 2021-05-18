@@ -97,7 +97,11 @@
         <%
         } else if ("INHERIT_CREDENTIALS".equals(settingCredentialProvider)) {
         %>
-            com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%> = new com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper();
+            com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%> = 
+				new com.amazonaws.auth.AWSCredentialsProviderChain(
+					new com.amazonaws.auth.profile.ProfileCredentialsProvider(),
+            		new com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper()
+            		);
         <%
         } else {
         %>
