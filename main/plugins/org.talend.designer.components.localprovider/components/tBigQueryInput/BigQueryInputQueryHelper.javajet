@@ -163,7 +163,7 @@ class BigQueryUtil_<%=cid%> {
 		<%
 		if(isLog4jEnabled){
 		%>
-			log.info("<%=cid%> - Wait for query execution");
+			log.info("<%=cid%> - Wait for query execution - jobId: " + insert.getJobReference().getJobId());
 		<%
 		}
 		%>
