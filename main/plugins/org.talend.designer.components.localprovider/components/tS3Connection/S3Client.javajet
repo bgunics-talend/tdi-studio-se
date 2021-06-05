@@ -74,22 +74,32 @@
 			log.info("<%=cid%> - Creating new connection.");
 		<%
 		}
-
-        String settingCredentialProvider = ElementParameterParser.getValue(node, "__CREDENTIAL_PROVIDER__");
-        if ("STATIC_CREDENTIALS".equals(settingCredentialProvider)) {
+		String settingCredentialProvider = ElementParameterParser.getValue(node, "__CREDENTIAL_PROVIDER__");
+		String[] builtInProviders = {"STATIC_CREDENTIALS","WEB_TOKEN","INHERIT_CREDENTIALS"};
+		for(String provider : builtInProviders) {
+			if(provider.equals(settingCredentialProvider)) {
+				settingCredentialProvider = "\"" + settingCredentialProvider + "\"";
+				break;
+			} 
+		}
+		%>
+        String settingCredentialProvider_<%=cid%> = <%=settingCredentialProvider%>;
+        com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%>;
+        if ("STATIC_CREDENTIALS".equals(settingCredentialProvider_<%=cid%>)) {
+        <%
             String passwordFieldName = "__SECRET_KEY__";
         %>
             <%@ include file="@{org.talend.designer.components.localprovider}/components/templates/password.javajet"%>
 
             com.amazonaws.auth.AWSCredentials credentials_<%=cid%> = new com.amazonaws.auth.BasicAWSCredentials(<%=accessKey%>,decryptedPassword_<%=cid%>);
-            com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%> = new com.amazonaws.auth.AWSStaticCredentialsProvider(credentials_<%=cid%>);
+            credentialsProvider_<%=cid%> = new com.amazonaws.auth.AWSStaticCredentialsProvider(credentials_<%=cid%>);
+        } else if ("WEB_TOKEN".equals(settingCredentialProvider_<%=cid%>)) {
         <%
-        } else if ("WEB_TOKEN".equals(settingCredentialProvider)) {
             String webTokenFile = ElementParameterParser.getValue(node, "__WEB_IDENTITY_TOKEN_FILE__");
             String webTokenArn = ElementParameterParser.getValue(node, "__WEB_TOKEN_ARN__");
             String webTokenSessionName = ElementParameterParser.getValue(node, "__WEB_TOKEN_ROLE_SESSION_NAME__");
         %>
-            com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%> = com.amazonaws.auth.WebIdentityTokenCredentialsProvider
+            credentialsProvider_<%=cid%> = com.amazonaws.auth.WebIdentityTokenCredentialsProvider
                 .builder()
             <%
                 if (webTokenFile != null && !webTokenFile.isEmpty()) {
@@ -110,16 +120,13 @@
             %>
                 .build();
         <%
-        } else if ("INHERIT_CREDENTIALS".equals(settingCredentialProvider)) {
         %>
-            com.amazonaws.auth.AWSCredentialsProvider credentialsProvider_<%=cid%> = new com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper();
-        <%
+        } else if ("INHERIT_CREDENTIALS".equals(settingCredentialProvider_<%=cid%>)) {
+            credentialsProvider_<%=cid%> = new com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper();
         } else {
-        %>
-            // Unknown credential provider is used: <%=settingCredentialProvider%>
-        <%
+
+            throw new RuntimeException("Unknown credential provider is used: " + settingCredentialProvider_<%=cid%> );
         }
-        %>
 		<%
 		boolean encrypt = "true".equals(ElementParameterParser.getValue(node,"__ENCRYPT__"));
 

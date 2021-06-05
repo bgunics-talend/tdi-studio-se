@@ -41,6 +41,7 @@
        FIELD="CLOSED_LIST"
        NUM_ROW="15"
        REQUIRED="true"
+       DYNAMIC_SETTINGS="true"
     >
       <ITEMS DEFAULT="STATIC_CREDENTIALS"> <!-- It's just a basic one -->
         <ITEM NAME="STATIC_CREDENTIALS" VALUE="STATIC_CREDENTIALS" SHOW_IF="true" />
